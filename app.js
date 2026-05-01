@@ -1,5 +1,5 @@
 const gameData = window.NEOMANMOLLA_DATA;
-const { avatars, biasStyles, dressUp, frames, idolGroups, metrics, packs, playerNames, themes } = gameData;
+const { avatars, biasStyles, dressUp, frames, idolGroups, packs, playerNames, themes } = gameData;
 const STORAGE_KEY = "neomanmolla-beta-state";
 const EVENTS_KEY = "neomanmolla-beta-events";
 const COPY = {
@@ -16,24 +16,24 @@ const COPY = {
     appLanguage: "표시 언어",
     playerLanguage: "플레이어 언어",
     save: "저장",
-    profileTitle: "보여야 팔립니다",
+    profileTitle: "내 캐릭터 꾸미기",
     me: "나",
     frameApplied: "프레임 적용 중",
     hair: "헤어",
     outfit: "의상",
     item: "소품",
     aura: "오라",
-    createRoomTitle: "테스트 링크 만들기",
+    createRoomTitle: "초대 링크 만들기",
     roomTheme: "방 테마",
     questionPack: "질문팩",
     playersSuffix: "명",
     packSuffix: "질문팩",
     inviteLink: "초대 링크",
     copyInvite: "초대 링크 복사",
-    localDemo: "로컬 데모 시작",
+    localDemo: "게임 시작",
     backHome: "처음으로",
-    joinTitle: "친구가 보낸 테스트 방",
-    joinBody: "지금 베타는 한 기기에서 흐름을 검증하는 로컬 데모입니다. 실시간 동기화는 다음 개발 단계입니다.",
+    joinTitle: "친구가 보낸 방",
+    joinBody: "친구들과 질문을 확인하고 어색한 답변을 찾아보세요.",
     joinRoom: "방 참가하기",
     trySolo: "혼자 먼저 해보기",
     howToPlay: "10초 룰",
@@ -42,18 +42,9 @@ const COPY = {
     rule3: "투표 후 질문이 공개되면 바로 납득되어야 합니다.",
     coreLoop: "답변 공개 -> 의심 -> 투표",
     target: "친구방, 방송, MT",
-    packsTitle: "콘텐츠가 수익화 포인트",
-    monetization: "팔 수 있는 것",
-    monetizationBody: "프로필 프레임, 캐릭터, 방 테마, 질문팩, 관전/시청자 투표.",
-    launchTitle: "런칭 전 검증",
-    launchBody: "네 칸이 다 OK가 되면 광고보다 친구 초대부터 열어볼 만합니다.",
-    checkRule: "첫판 룰 이해",
-    checkResult: "결과 납득",
-    checkReplay: "3판 재시도",
-    checkInvite: "친구 초대",
-    partyDemo: "Party Demo",
+    packsTitle: "오늘의 질문팩",
     partyTitle: "한 명만 다른 질문을 받습니다.",
-    partyBody: "휴대폰을 넘기며 질문 확인, 답변 입력, 투표까지 한 기기에서 테스트합니다.",
+    partyBody: "휴대폰을 넘기며 질문 확인, 답변 입력, 투표까지 진행합니다.",
     startGame: "게임 시작",
     findFake: "누가 다른 질문을 받았을까요?",
     soloBody: "공통 질문의 분위기에서 벗어난 답변을 고르세요.",
@@ -67,7 +58,6 @@ const COPY = {
     commonQuestion: "공통 질문",
     fakeQuestion: "가짜 질문",
     nextQuestion: "다음 문제",
-    betaFeedback: "베타 피드백 보기",
     gameOverBody: "문제까지 버텼습니다. 이 정도면 눈치 예열은 됐어요.",
     retry: "다시 하기",
     yourDifferentQuestion: "너만 다른 질문",
@@ -80,7 +70,7 @@ const COPY = {
     answerPlaceholder: "예: 치킨",
     submitDone: "답변 완료",
     nextPerson: "다음 사람",
-    quickAnswer: "테스트 답변 자동 입력",
+    quickAnswer: "자동 답변 입력",
     talk: "토론",
     vote: "투표하기",
     voteTitle: "누가 다른 질문을 받았을까요?",
@@ -93,18 +83,8 @@ const COPY = {
     roomResult: "방 결과",
     todayFake: "오늘의 가짜",
     resultCardBody: "친구에게 보여주기 좋은 문구입니다.",
-    partyCardBody: "다음 베타에서는 이 카드가 이미지로 저장됩니다.",
+    partyCardBody: "오늘 방에서 나온 결과입니다.",
     copyResult: "결과 복사",
-    feedbackTitle: "테스터에게 물어볼 것",
-    feedbackRule: "1. 첫판 룰을 바로 이해했나요?",
-    feedbackRuleBody: "10초 안에 이해 못 하면 온보딩을 고쳐야 합니다.",
-    feedbackResult: "2. 왜 가짜인지 납득됐나요?",
-    feedbackResultBody: "질문 공개와 답변 비교가 핵심 검증 포인트입니다.",
-    feedbackInvite: "3. 친구에게 링크를 보낼 만큼 웃겼나요?",
-    feedbackInviteBody: "이 대답이 아니면 질문팩을 더 세게 만들어야 합니다.",
-    feedbackReplay: "3. 3판 이상 재플레이 의향:",
-    feedbackPaid: "5. 돈 내도 살 질문팩:",
-    copyFeedback: "피드백 양식 복사",
     main: "메인으로",
     quit: "그만두기",
     score: "점수",
@@ -119,7 +99,6 @@ const COPY = {
     answerTurn: "님 답변",
     copiedInvite: "초대 링크를 복사했습니다",
     copiedResult: "결과를 복사했습니다",
-    copiedFeedback: "피드백 양식을 복사했습니다",
     copyBlocked: "복사가 막혔어요. HTTPS 배포 링크에서는 정상 동작합니다",
     answerRequired: "짧게라도 답변을 적어야 다음으로 넘어가요",
     resultHit: "맞혔다",
@@ -138,24 +117,24 @@ const COPY = {
     appLanguage: "表示言語",
     playerLanguage: "プレイヤー言語",
     save: "保存",
-    profileTitle: "見せたくなる見た目に",
+    profileTitle: "キャラを着せ替え",
     me: "自分",
     frameApplied: "フレーム適用中",
     hair: "ヘア",
     outfit: "衣装",
     item: "小物",
     aura: "オーラ",
-    createRoomTitle: "テストリンクを作成",
+    createRoomTitle: "招待リンクを作成",
     roomTheme: "ルームテーマ",
     questionPack: "質問パック",
     playersSuffix: "人",
     packSuffix: "質問パック",
     inviteLink: "招待リンク",
     copyInvite: "招待リンクをコピー",
-    localDemo: "ローカルデモ開始",
+    localDemo: "ゲーム開始",
     backHome: "最初へ",
-    joinTitle: "友だちから届いたテストルーム",
-    joinBody: "このベータは1台の端末で流れを確認するローカルデモです。リアルタイム同期は次の開発段階です。",
+    joinTitle: "友だちから届いたルーム",
+    joinBody: "友だちと質問を確認して、怪しい答えを見つけましょう。",
     joinRoom: "ルームに参加",
     trySolo: "先に一人で試す",
     howToPlay: "10秒ルール",
@@ -164,18 +143,9 @@ const COPY = {
     rule3: "投票後に質問が公開され、理由がすぐ分かるのが大事です。",
     coreLoop: "答え公開 -> 疑う -> 投票",
     target: "友だち部屋、配信、合宿",
-    packsTitle: "コンテンツが収益ポイント",
-    monetization: "販売できるもの",
-    monetizationBody: "プロフィールフレーム、キャラ、ルームテーマ、質問パック、観戦/視聴者投票。",
-    launchTitle: "公開前チェック",
-    launchBody: "4つ全部OKなら、広告より先に友だち招待を開ける価値があります。",
-    checkRule: "初回ルール理解",
-    checkResult: "結果に納得",
-    checkReplay: "3回リプレイ",
-    checkInvite: "友だち招待",
-    partyDemo: "Party Demo",
+    packsTitle: "今日の質問パック",
     partyTitle: "一人だけ違う質問を受けます。",
-    partyBody: "スマホを回しながら質問確認、答え入力、投票まで1台でテストします。",
+    partyBody: "スマホを回しながら質問確認、答え入力、投票まで進めます。",
     startGame: "ゲーム開始",
     findFake: "違う質問を受けたのは誰？",
     soloBody: "共通質問の雰囲気から外れた答えを選んでください。",
@@ -189,7 +159,6 @@ const COPY = {
     commonQuestion: "共通質問",
     fakeQuestion: "偽質問",
     nextQuestion: "次の問題",
-    betaFeedback: "ベータフィードバック",
     gameOverBody: "問まで耐えました。かなり目が慣れてきています。",
     retry: "もう一度",
     yourDifferentQuestion: "君だけ違う質問",
@@ -202,7 +171,7 @@ const COPY = {
     answerPlaceholder: "例: チキン",
     submitDone: "回答完了",
     nextPerson: "次の人",
-    quickAnswer: "テスト回答を自動入力",
+    quickAnswer: "回答を自動入力",
     talk: "トーク",
     vote: "投票する",
     voteTitle: "違う質問を受けたのは誰？",
@@ -215,18 +184,8 @@ const COPY = {
     roomResult: "ルーム結果",
     todayFake: "今日の偽物",
     resultCardBody: "友だちに見せやすい文面です。",
-    partyCardBody: "次のベータではこのカードを画像保存できます。",
+    partyCardBody: "今日のルーム結果です。",
     copyResult: "結果をコピー",
-    feedbackTitle: "テスターに聞くこと",
-    feedbackRule: "1. 初回でルールを理解できましたか？",
-    feedbackRuleBody: "10秒以内に分からないならオンボーディングを直す必要があります。",
-    feedbackResult: "2. なぜ偽物か納得できましたか？",
-    feedbackResultBody: "質問公開と答え比較が検証の中心です。",
-    feedbackInvite: "3. 友だちにリンクを送りたいほど笑えましたか？",
-    feedbackInviteBody: "ここが弱ければ質問パックをもっと強くします。",
-    feedbackReplay: "3. 3回以上また遊びたい:",
-    feedbackPaid: "5. 有料でも欲しい質問パック:",
-    copyFeedback: "フィードバック用紙をコピー",
     main: "メインへ",
     quit: "やめる",
     score: "点数",
@@ -241,7 +200,6 @@ const COPY = {
     answerTurn: "さんの答え",
     copiedInvite: "招待リンクをコピーしました",
     copiedResult: "結果をコピーしました",
-    copiedFeedback: "フィードバック用紙をコピーしました",
     copyBlocked: "コピーがブロックされました。HTTPSの公開リンクでは動作します",
     answerRequired: "短くても答えを入力すると次へ進めます",
     resultHit: "当てた",
@@ -282,12 +240,6 @@ const state = {
   customNames: [...playerNames],
   playerLangs: ["ko", "ja", "ko", "ja", "ko", "ja"],
   currentAnswer: "",
-  launchChecklist: {
-    rule: false,
-    result: false,
-    replay: false,
-    invite: false,
-  },
   toast: "",
 };
 
@@ -327,10 +279,6 @@ function localeDataFor(lang) {
 
 function playerNameList() {
   return localeData()?.playerNames || playerNames;
-}
-
-function localizedMetrics() {
-  return localeData()?.metrics || metrics;
 }
 
 function packId(pack) {
@@ -536,23 +484,6 @@ function resultText() {
     `${t("fakeQuestion")}: ${questionForPlayer(0, true)} / ${questionForPlayer(1, true)}`,
     `${selectedPack().name} ${t("packSuffix")}`,
     roomInviteUrl(),
-  ].join("\n");
-}
-
-function feedbackText() {
-  const stats = betaStats();
-  return [
-    `${t("title")} ${t("betaFeedback")}`,
-    `${t("packSuffix")}: ${selectedPack().name}`,
-    `${t("createRoom")}: ${themeLabel(state.selectedTheme)}`,
-    `${t("soloPlay")}: ${stats.soloStart || 0}`,
-    `${t("roomResult")}: ${stats.resultView || 0}`,
-    `${t("copyInvite")}: ${stats.inviteCopy || 0}`,
-    t("feedbackRule"),
-    t("feedbackResult"),
-    t("feedbackReplay"),
-    t("feedbackInvite"),
-    t("feedbackPaid"),
   ].join("\n");
 }
 
@@ -842,7 +773,6 @@ function lobbyView() {
     </section>
     ${mvpOverview()}
     ${packPreview()}
-    ${monetizePanel()}
   `);
 }
 
@@ -983,21 +913,13 @@ function mvpOverview() {
     </section>
     <section class="mvp-grid">
       <article>
-        <span>Core Loop</span>
+        <span>Flow</span>
         <strong>${t("coreLoop")}</strong>
       </article>
       <article>
-        <span>Target</span>
+        <span>Play With</span>
         <strong>${t("target")}</strong>
       </article>
-    </section>
-    <section class="metric-row">
-      ${localizedMetrics().map((metric) => `
-        <article>
-          <span>${metric.label}</span>
-          <strong>${metric.value}</strong>
-        </article>
-      `).join("")}
     </section>
   `;
 }
@@ -1022,48 +944,10 @@ function packPreview() {
   `;
 }
 
-function monetizePanel() {
-  return `
-    <section class="cast-panel pro-panel">
-      <div>
-        <strong>${t("monetization")}</strong>
-        <p>${t("monetizationBody")}</p>
-      </div>
-      <div class="live-pill">MVP</div>
-    </section>
-    ${launchPanel()}
-  `;
-}
-
-function launchPanel() {
-  const items = [
-    ["rule", t("checkRule")],
-    ["result", t("checkResult")],
-    ["replay", t("checkReplay")],
-    ["invite", t("checkInvite")],
-  ];
-  return `
-    <section class="panel launch-panel">
-      <div class="section-head">
-        <span>Pre Open</span>
-        <strong>${t("launchTitle")}</strong>
-      </div>
-      <div class="launch-grid">
-        ${items.map(([key, label]) => `
-          <button class="${state.launchChecklist[key] ? "checked" : ""}" data-check="${key}">
-            <span>${state.launchChecklist[key] ? "OK" : "?"}</span>${label}
-          </button>
-        `).join("")}
-      </div>
-      <p>${t("launchBody")}</p>
-    </section>
-  `;
-}
-
 function partyReadyView() {
   shell(`
     <section class="panel intro">
-      <div class="tag">Party Demo</div>
+      <div class="tag">Party</div>
       <h2>${t("partyTitle")}</h2>
       <p>${t("partyBody")}</p>
       <div class="count-row">
@@ -1137,7 +1021,6 @@ function soloResultView() {
     </section>
     ${soloRevealList()}
     <button class="primary full floating" data-action="solo-next">${t("nextQuestion")}</button>
-    <button class="secondary full floating" data-action="feedback">${t("betaFeedback")}</button>
   `);
 }
 
@@ -1287,7 +1170,6 @@ function resultView() {
       `).join("")}
     </section>
     <button class="primary full floating" data-action="again">${t("nextRound")}</button>
-    <button class="secondary full floating" data-action="feedback">${t("betaFeedback")}</button>
   `);
 }
 
@@ -1324,22 +1206,6 @@ function partyResultCard(fake) {
       </article>
     </section>
   `;
-}
-
-function feedbackView() {
-  shell(`
-    <section class="panel feedback-panel">
-      <div class="section-head">
-        <span>Beta Feedback</span>
-        <strong>${t("feedbackTitle")}</strong>
-      </div>
-      <article><strong>${t("feedbackRule")}</strong><p>${t("feedbackRuleBody")}</p></article>
-      <article><strong>${t("feedbackResult")}</strong><p>${t("feedbackResultBody")}</p></article>
-      <article><strong>${t("feedbackInvite")}</strong><p>${t("feedbackInviteBody")}</p></article>
-      <button class="secondary full" data-action="copy-feedback">${t("copyFeedback")}</button>
-      <button class="primary full" data-action="back-lobby">${t("main")}</button>
-    </section>
-  `);
 }
 
 function quitBar() {
@@ -1411,7 +1277,6 @@ function render() {
   if (state.phase === "joinRoom") joinRoomView();
   if (state.phase === "profile") profileView();
   if (state.phase === "roomCreate") roomCreateView();
-  if (state.phase === "feedback") feedbackView();
   if (state.phase === "partyReady") partyReadyView();
   if (state.phase === "solo") soloView();
   if (state.phase === "soloResult") soloResultView();
@@ -1438,10 +1303,6 @@ app.addEventListener("click", (event) => {
       render();
     }
   }
-  if (button.dataset.check) {
-    state.launchChecklist[button.dataset.check] = !state.launchChecklist[button.dataset.check];
-    render();
-  }
   if (button.dataset.action === "solo-start") startSolo();
   if (button.dataset.action === "copy-invite") {
     copyText(roomInviteUrl(), t("copiedInvite"));
@@ -1451,10 +1312,6 @@ app.addEventListener("click", (event) => {
     copyText(resultText(), t("copiedResult"));
     track("resultCopy");
   }
-  if (button.dataset.action === "copy-feedback") {
-    copyText(feedbackText(), t("copiedFeedback"));
-    track("feedbackCopy");
-  }
   if (button.dataset.action === "profile") {
     state.phase = "profile";
     render();
@@ -1462,10 +1319,6 @@ app.addEventListener("click", (event) => {
   if (button.dataset.action === "room-create") {
     state.roomCode = generateRoomCode();
     state.phase = "roomCreate";
-    render();
-  }
-  if (button.dataset.action === "feedback") {
-    state.phase = "feedback";
     render();
   }
   if (button.dataset.action === "party-ready") {

@@ -61,17 +61,12 @@ window.NEOMANMOLLA_DATA = {
     { id: "le-sserafim", type: "girl", name: "LE SSERAFIM", tags: ["퍼포먼스", "당당함", "무대"] },
   ],
   themes: ["네온 지하실", "교실 after", "우주 정거장"],
-  metrics: [
-    { label: "첫판 완료율", value: "70%+" },
-    { label: "3판 재시도", value: "35%+" },
-    { label: "초대 클릭", value: "20%+" },
-  ],
   packs: [
     {
       id: "kpop",
       name: "케이팝 팬덤",
       count: 52,
-      status: "Plus",
+      status: "팬덤",
       tone: "최애 얘기만으로 바로 싸움 나는 질문",
       rounds: [
         {
@@ -112,7 +107,7 @@ window.NEOMANMOLLA_DATA = {
       id: "daily",
       name: "일상",
       count: 48,
-      status: "무료",
+      status: "기본",
       tone: "처음 하는 친구도 바로 답하는 질문",
       rounds: [
         {
@@ -153,7 +148,7 @@ window.NEOMANMOLLA_DATA = {
       id: "romance",
       name: "연애/썸",
       count: 36,
-      status: "Plus",
+      status: "인기",
       tone: "대답만 봐도 놀림거리가 생기는 질문",
       rounds: [
         {
@@ -186,7 +181,7 @@ window.NEOMANMOLLA_DATA = {
       id: "party",
       name: "MT/술자리",
       count: 42,
-      status: "Plus",
+      status: "파티",
       tone: "짧고 웃긴 단체용 질문",
       rounds: [
         {
@@ -284,15 +279,10 @@ window.NEOMANMOLLA_DATA = {
         "교실 after": "放課後の教室",
         "우주 정거장": "宇宙ステーション",
       },
-      metrics: [
-        { label: "初回完走率", value: "70%+" },
-        { label: "3回リプレイ", value: "35%+" },
-        { label: "招待クリック", value: "20%+" },
-      ],
       packs: {
         kpop: {
           name: "K-POPファンダム",
-          status: "Plus",
+          status: "ファン",
           tone: "推しの話だけで盛り上がれる質問",
           rounds: [
             {
@@ -331,7 +321,7 @@ window.NEOMANMOLLA_DATA = {
         },
         daily: {
           name: "日常",
-          status: "無料",
+          status: "基本",
           tone: "初めてでもすぐ答えられる質問",
           rounds: [
             {
@@ -370,7 +360,7 @@ window.NEOMANMOLLA_DATA = {
         },
         romance: {
           name: "恋愛/気になる人",
-          status: "Plus",
+          status: "人気",
           tone: "答えだけでいじれる質問",
           rounds: [
             {
@@ -401,7 +391,7 @@ window.NEOMANMOLLA_DATA = {
         },
         party: {
           name: "合宿/飲み会",
-          status: "Plus",
+          status: "パーティー",
           tone: "短く笑えるグループ向け質問",
           rounds: [
             {

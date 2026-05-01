@@ -11,28 +11,16 @@ Purpose: 실제 테스트 유저에게 링크를 보내 검증할 수 있는 모
 - Solo beta: user + 3 bot players.
 - Party demo: 4-6 player flow simulated on one device.
 - Party input: each local player can enter a real answer after viewing their private question.
-- Data-driven content: questions, packs, avatars, frames, themes, and metrics live in `game-data.js`.
-- Localization: Korean and Japanese UI copy, question packs, pack metadata, metrics, themes, and player defaults.
+- Data-driven content: questions, packs, avatars, frames, and themes live in `game-data.js`.
+- Localization: Korean and Japanese UI copy, question packs, pack metadata, themes, and player defaults.
 - Mixed-language rooms: each player can select KO or JA and receives the same round in their own language.
 - K-pop internal data: 5 boy groups and 5 girl groups are included for private testing only.
-- Avatar monetization test: full-body character dressing supports hair, outfit, item, aura, idol group, bias style, and frame.
+- Full-body character dressing supports hair, outfit, item, aura, idol group, bias style, and frame.
 - Language UI is select-based so English can be added without redesigning the lobby or ready room.
-- Product surfaces: room creation, profile setup, question packs, result card, beta feedback screen.
+- Product surfaces: room creation, profile setup, question packs, and result card.
 - Room links: static URL query parameters carry room code, pack, theme, and player count for tester onboarding.
 - Language links: `lang=ko` and `lang=ja` are preserved in invite links.
 - Local persistence: profile/pack/theme settings and lightweight beta event counters are stored in `localStorage`.
-
-## Monetization Hypothesis
-
-Primary:
-
-- Question packs.
-- Host/Pro room features.
-- Result card and streamer/audience features.
-
-Secondary:
-
-- Full-body avatar parts, profile frames, idol-inspired style presets, and room themes.
 
 ## Beta Test Questions
 
@@ -40,7 +28,6 @@ Secondary:
 2. Does the result screen explain why the fake player was fake?
 3. Do testers want to play 3 rounds or more?
 4. Would testers send the link to friends?
-5. Which question pack feels worth paying for?
 
 ## Technical Status
 
@@ -48,7 +35,7 @@ Secondary:
 - No backend yet.
 - No real multiplayer synchronization yet.
 - No server-side analytics yet. Current counters are local-only.
-- No payment, account, or database integration.
+- No account or database integration yet.
 - User-entered text is stripped of angle brackets before rendering to reduce static-demo injection risk.
 - K-pop group names are internal-test placeholders until rights, naming, and update policy are approved.
 
@@ -61,7 +48,7 @@ Secondary:
 ## Next Engineering Steps
 
 1. Add realtime sync with Supabase or Firebase.
-2. Add hosted feedback form or lightweight backend.
+2. Add lightweight backend.
 3. Add server-side analytics for first-play completion, replay, and invite clicks.
 4. Add moderation and report handling before public traffic.
 5. Add account/payment only after retention signal is visible.
