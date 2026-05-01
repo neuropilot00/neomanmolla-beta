@@ -39,6 +39,7 @@ const COPY = {
     profileTitle: "내 캐릭터 꾸미기",
     me: "나",
     frameApplied: "프레임 적용 중",
+    preset: "프리셋",
     body: "베이스",
     hair: "헤어",
     eyes: "눈",
@@ -200,6 +201,7 @@ const COPY = {
     profileTitle: "キャラを着せ替え",
     me: "自分",
     frameApplied: "フレーム適用中",
+    preset: "プリセット",
     body: "ベース",
     hair: "ヘア",
     eyes: "目",
@@ -353,6 +355,7 @@ const state = {
   selectedPose: settings.characterPoses[0].id,
   selectedFrame: frames[0].id,
   selectedBiasStyle: biasStyles[0].id,
+  selectedPreset: dressUp.preset[0].id,
   selectedBody: dressUp.body[0].id,
   selectedHair: dressUp.hair[3].id,
   selectedEyes: dressUp.eyes[0].id,
@@ -374,7 +377,7 @@ const state = {
   selectedQuestionTheme: packs[0].defaultQuestionTheme || "all",
   selectedAudiencePreset: settings.audiencePresets[0].id,
   profileTab: settings.profileTabs[0],
-  activeDressCategory: "hair",
+  activeDressCategory: "preset",
   lang: "ko",
   customNames: [...playerNames],
   playerLangs: [...settings.defaultPlayerLangs],
@@ -1019,7 +1022,20 @@ function profileAvatarMarkup(extraClass = "") {
 function fullBodyAvatarMarkup() {
   const aura = dressOption("aura", state.selectedAura).color || "#ffd166";
   const back = dressOption("back", state.selectedBack);
-  const layers = ["body", "pants", "shoes", "top", "hair", "eyes", "lips", "beauty", "accessory", "item"]
+  const preset = dressOption("preset", state.selectedPreset);
+  if (preset?.asset) {
+    return `
+      <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="--aura:${aura};">
+        ${back.id !== "none" ? `<span class="closet-back">${back.symbol || ""}</span>` : ""}
+        <span class="stage-aura"></span>
+        <span class="asset-character preset-character">
+          <i class="asset-shadow"></i>
+          <img class="asset-layer asset-preset" src="${preset.asset}" alt="" />
+        </span>
+      </div>
+    `;
+  }
+  const layers = ["body", "pants", "shoes", "top", "hair", "lips", "beauty", "accessory", "item"]
     .map((type) => ({ type, item: dressOption(type, state[selectedDressKey(type)]) }))
     .filter(({ item }) => item?.asset);
   return `
@@ -1378,7 +1394,7 @@ function profileView() {
         <div>
           <strong>${t("me")}</strong>
           <p>${group.name} · ${biasStyleLabel(state.selectedBiasStyle)}</p>
-          <small>${dressLabel("hair", state.selectedHair)} / ${dressLabel("top", state.selectedTop)} / ${dressLabel("pants", state.selectedPants)} / ${dressLabel("shoes", state.selectedShoes)} / ${frameLabel(state.selectedFrame)} ${t("frameApplied")}</small>
+          <small>${dressLabel("preset", state.selectedPreset)} / ${frameLabel(state.selectedFrame)} ${t("frameApplied")}</small>
         </div>
       </div>
       <div class="tab-row">

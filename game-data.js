@@ -6,7 +6,7 @@ window.NEOMANMOLLA_DATA = {
     ],
     playerCounts: [4, 5, 6],
     defaultPlayerLangs: ["ko", "ja", "ko", "ja", "ko", "ja"],
-    profileCategories: ["body", "hair", "eyes", "lips", "beauty", "accessory", "top", "pants", "shoes", "item", "back", "aura"],
+    profileCategories: ["preset", "back", "aura"],
     profileTabs: ["parts", "artist", "frame"],
     characterPoses: [
       { id: "idle", label: "기본" },
@@ -67,6 +67,20 @@ window.NEOMANMOLLA_DATA = {
     { id: "rapper", label: "래퍼", detail: "강한 랩톤, 블랙 캡" },
   ],
   dressUp: {
+    preset: [
+      { id: "wolf-guitar", label: "블랙 기타", symbol: "01", rarity: "SR", asset: "./assets/avatar/presets/wolf-guitar.png", thumb: "./assets/avatar/presets/wolf-guitar.png" },
+      { id: "red-drummer", label: "레드 드러머", symbol: "02", rarity: "SR", asset: "./assets/avatar/presets/red-drummer.png", thumb: "./assets/avatar/presets/red-drummer.png" },
+      { id: "ash-keyboard", label: "애쉬 키보드", symbol: "03", rarity: "SR", asset: "./assets/avatar/presets/ash-keyboard.png", thumb: "./assets/avatar/presets/ash-keyboard.png" },
+      { id: "blond-bass", label: "블론드 베이스", symbol: "04", rarity: "SR", asset: "./assets/avatar/presets/blond-bass.png", thumb: "./assets/avatar/presets/blond-bass.png" },
+      { id: "pink-vocal", label: "핑크 보컬", symbol: "05", rarity: "SR", asset: "./assets/avatar/presets/pink-vocal.png", thumb: "./assets/avatar/presets/pink-vocal.png" },
+      { id: "stripe-bass", label: "스트라이프 베이스", symbol: "06", rarity: "SR", asset: "./assets/avatar/presets/stripe-bass.png", thumb: "./assets/avatar/presets/stripe-bass.png" },
+      { id: "silver-mic", label: "실버 마이크", symbol: "07", rarity: "SR", asset: "./assets/avatar/presets/silver-mic.png", thumb: "./assets/avatar/presets/silver-mic.png" },
+      { id: "hime-stage", label: "히메 스테이지", symbol: "08", rarity: "SR", asset: "./assets/avatar/presets/hime-stage.png", thumb: "./assets/avatar/presets/hime-stage.png" },
+      { id: "mint-fan", label: "민트 팬룩", symbol: "09", rarity: "SR", asset: "./assets/avatar/presets/mint-fan.png", thumb: "./assets/avatar/presets/mint-fan.png" },
+      { id: "purple-guitar", label: "퍼플 기타", symbol: "10", rarity: "SR", asset: "./assets/avatar/presets/purple-guitar.png", thumb: "./assets/avatar/presets/purple-guitar.png" },
+      { id: "gold-vocal", label: "골드 보컬", symbol: "11", rarity: "SSR", asset: "./assets/avatar/presets/gold-vocal.png", thumb: "./assets/avatar/presets/gold-vocal.png" },
+      { id: "techwear", label: "테크웨어", symbol: "12", rarity: "SSR", asset: "./assets/avatar/presets/techwear.png", thumb: "./assets/avatar/presets/techwear.png" },
+    ],
     body: [
       { id: "base-m", label: "남자 기본", symbol: "M", rarity: "N", skin: "#f3b27d", asset: "./assets/avatar/body-base-m.png", thumb: "./assets/avatar/thumbs/body-base-m.png" },
       { id: "base-f", label: "여자 기본", symbol: "F", rarity: "N", skin: "#f0a978", asset: "./assets/avatar/body-base-f.png", thumb: "./assets/avatar/thumbs/body-base-f.png" },
