@@ -2,6 +2,7 @@ const gameData = window.NEOMANMOLLA_DATA;
 const { avatars, biasStyles, characterSets, dressUp, frames, heroSlides, idolGroups, notices, packs, playerNames, settings, themes } = gameData;
 const STORAGE_KEY = "neomanmolla-beta-state";
 const EVENTS_KEY = "neomanmolla-beta-events";
+const DEFAULT_API_BASE_URL = "https://neomanmolla-beta-production.up.railway.app";
 const COPY = {
   ko: {
     eyebrow: "4-6인 실시간 파티 추리",
@@ -10,6 +11,7 @@ const COPY = {
     heroTitle: "답변 하나로 친구를 의심하세요.",
     heroBody: "한 명만 다른 질문을 받습니다. 자연스러운 척하는 답변을 찾아내세요.",
     soloPlay: "혼자 플레이",
+    quickMatch: "빠른 참가",
     createRoom: "방 만들기",
     profile: "내 프로필",
     guide: "게임 방법",
@@ -28,7 +30,10 @@ const COPY = {
     frameApplied: "프레임 적용 중",
     hair: "헤어",
     outfit: "의상",
+    hat: "모자",
+    face: "얼굴",
     item: "소품",
+    back: "배경",
     aura: "오라",
     pose: "포즈",
     parts: "꾸미기",
@@ -52,7 +57,7 @@ const COPY = {
     audiencePick: "시청자는 누구를 의심하나요?",
     audienceLocked: "시청자 예측 완료",
     audienceResult: "시청자 예측",
-    localDemo: "게임 시작",
+    localDemo: "방 열기",
     backHome: "처음으로",
     openSettings: "설정",
     joinTitle: "친구가 보낸 방",
@@ -129,12 +134,17 @@ const COPY = {
     answerRequired: "짧게라도 답변을 적어야 다음으로 넘어가요",
     resultHit: "맞혔다",
     resultMiss: "속았다",
-    apiServer: "Railway API URL",
-    connectServer: "서버 연결 확인",
     serverConnected: "서버 연결 성공",
     serverFailed: "서버 연결 실패",
-    createOnlineRoom: "서버 방 생성",
-    onlineRoomCreated: "서버 방을 만들었습니다",
+    onlineRoomCreated: "방을 만들었습니다",
+    waitingRoom: "대기실",
+    onlineStart: "온라인 시작",
+    refresh: "새로고침",
+    joinAs: "닉네임",
+    waitingPlayers: "참가자를 기다리는 중",
+    submitted: "제출 완료",
+    waitOthers: "다른 참가자를 기다리는 중",
+    onlineVoteReady: "모든 답변이 모였습니다",
   },
   ja: {
     eyebrow: "4-6人リアルタイム推理",
@@ -143,6 +153,7 @@ const COPY = {
     heroTitle: "答えひとつで友だちを疑おう。",
     heroBody: "一人だけ違う質問を受けます。自然なふりをする答えを見抜いてください。",
     soloPlay: "一人で遊ぶ",
+    quickMatch: "クイック参加",
     createRoom: "ルーム作成",
     profile: "プロフィール",
     guide: "遊び方",
@@ -161,7 +172,10 @@ const COPY = {
     frameApplied: "フレーム適用中",
     hair: "ヘア",
     outfit: "衣装",
+    hat: "帽子",
+    face: "顔",
     item: "小物",
+    back: "背景",
     aura: "オーラ",
     pose: "ポーズ",
     parts: "着せ替え",
@@ -185,7 +199,7 @@ const COPY = {
     audiencePick: "視聴者は誰を疑う？",
     audienceLocked: "視聴者予想完了",
     audienceResult: "視聴者予想",
-    localDemo: "ゲーム開始",
+    localDemo: "ルームを開く",
     backHome: "最初へ",
     openSettings: "設定",
     joinTitle: "友だちから届いたルーム",
@@ -262,12 +276,17 @@ const COPY = {
     answerRequired: "短くても答えを入力すると次へ進めます",
     resultHit: "当てた",
     resultMiss: "騙された",
-    apiServer: "Railway API URL",
-    connectServer: "サーバー接続確認",
     serverConnected: "サーバー接続成功",
     serverFailed: "サーバー接続失敗",
-    createOnlineRoom: "サーバールーム作成",
-    onlineRoomCreated: "サーバールームを作成しました",
+    onlineRoomCreated: "ルームを作成しました",
+    waitingRoom: "待機室",
+    onlineStart: "オンライン開始",
+    refresh: "更新",
+    joinAs: "ニックネーム",
+    waitingPlayers: "参加者を待っています",
+    submitted: "提出済み",
+    waitOthers: "他の参加者を待っています",
+    onlineVoteReady: "全員の回答が集まりました",
   },
 };
 
@@ -298,7 +317,10 @@ const state = {
   selectedBiasStyle: biasStyles[0].id,
   selectedHair: dressUp.hair[0].id,
   selectedOutfit: dressUp.outfit[0].id,
+  selectedHat: dressUp.hat[0].id,
+  selectedFace: dressUp.face[0].id,
   selectedItem: dressUp.item[0].id,
+  selectedBack: dressUp.back[0].id,
   selectedAura: dressUp.aura[0].id,
   selectedIdolGroup: idolGroups[0].id,
   selectedTheme: themes[0].id,
@@ -309,7 +331,10 @@ const state = {
   lang: "ko",
   customNames: [...playerNames],
   playerLangs: [...settings.defaultPlayerLangs],
-  apiBaseUrl: "",
+  apiBaseUrl: DEFAULT_API_BASE_URL,
+  onlineRoom: null,
+  onlinePlayerId: "",
+  onlineName: "",
   currentAnswer: "",
   toast: "",
   heroTouchedAt: 0,
@@ -318,6 +343,7 @@ const state = {
 const app = document.querySelector("#app");
 const languageOptions = settings.languages;
 let heroTimer = null;
+let onlinePollTimer = null;
 
 function sample(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -524,6 +550,7 @@ function spriteCellMarkup(column, row, extraClass = "") {
 
 function menuItems() {
   const actions = {
+    "quick-match": { label: t("quickMatch"), className: "primary", action: "quick-match" },
     "solo-start": { label: t("soloPlay"), className: "primary", action: "solo-start" },
     "room-create": { label: t("createRoom"), className: "secondary", action: "room-create" },
     profile: { label: t("profile"), className: "secondary", action: "profile" },
@@ -571,12 +598,14 @@ function generateRoomCode() {
 }
 
 function saveSettings() {
+  const dress = Object.fromEntries(settings.profileCategories.map((type) => [type, state[selectedDressKey(type)]]));
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify({
       selectedAvatar: state.selectedAvatar,
       selectedPose: state.selectedPose,
       selectedBiasStyle: state.selectedBiasStyle,
+      dress,
       selectedHair: state.selectedHair,
       selectedOutfit: state.selectedOutfit,
       selectedItem: state.selectedItem,
@@ -588,7 +617,6 @@ function saveSettings() {
       selectedTheme: state.selectedTheme,
       customNames: state.customNames,
       playerLangs: state.playerLangs,
-      apiBaseUrl: state.apiBaseUrl,
       lang: state.lang,
     }),
   );
@@ -600,10 +628,11 @@ function loadSettings() {
     if (Number.isInteger(saved.selectedAvatar)) state.selectedAvatar = saved.selectedAvatar;
     if (settings.characterPoses.some((pose) => pose.id === saved.selectedPose)) state.selectedPose = saved.selectedPose;
     if (biasStyles.some((style) => style.id === saved.selectedBiasStyle)) state.selectedBiasStyle = saved.selectedBiasStyle;
-    if (dressOptions("hair").some((item) => item.id === saved.selectedHair)) state.selectedHair = saved.selectedHair;
-    if (dressOptions("outfit").some((item) => item.id === saved.selectedOutfit)) state.selectedOutfit = saved.selectedOutfit;
-    if (dressOptions("item").some((item) => item.id === saved.selectedItem)) state.selectedItem = saved.selectedItem;
-    if (dressOptions("aura").some((item) => item.id === saved.selectedAura)) state.selectedAura = saved.selectedAura;
+    settings.profileCategories.forEach((type) => {
+      const stateKey = selectedDressKey(type);
+      const savedId = saved.dress?.[type] || saved[stateKey];
+      if (dressOptions(type).some((item) => item.id === savedId)) state[stateKey] = savedId;
+    });
     if (frames.some((frame) => frame.id === saved.selectedFrame)) state.selectedFrame = saved.selectedFrame;
     if (idolGroups.some((group) => group.id === saved.selectedIdolGroup)) state.selectedIdolGroup = saved.selectedIdolGroup;
     if (packs.some((pack) => pack.name === saved.selectedPack || packId(pack) === saved.selectedPack)) state.selectedPack = saved.selectedPack;
@@ -614,7 +643,6 @@ function loadSettings() {
     if (Array.isArray(saved.customNames)) state.customNames = playerNameList().map((name, index) => cleanText(saved.customNames[index], name));
     else state.customNames = [...playerNameList()];
     if (Array.isArray(saved.playerLangs)) state.playerLangs = playerNames.map((_, index) => supportedLang(saved.playerLangs[index]) ? saved.playerLangs[index] : state.playerLangs[index]);
-    if (typeof saved.apiBaseUrl === "string") state.apiBaseUrl = saved.apiBaseUrl;
   } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
@@ -624,7 +652,7 @@ function applyUrlRoom() {
   const params = new URLSearchParams(window.location.search);
   const room = params.get("room");
   const api = params.get("api");
-  if (api) state.apiBaseUrl = api;
+  if (api && location.hostname === "localhost") state.apiBaseUrl = api;
   if (!room) return;
 
   state.roomCode = room;
@@ -653,6 +681,7 @@ function applyUrlRoom() {
     });
   }
   state.phase = "joinRoom";
+  fetchOnlineRoom(false);
 }
 
 function track(eventName) {
@@ -666,11 +695,11 @@ function betaStats() {
 }
 
 function normalizedApiBase() {
-  return state.apiBaseUrl.trim().replace(/\/+$/, "");
+  return DEFAULT_API_BASE_URL;
 }
 
 function apiEnabled() {
-  return /^https?:\/\//.test(normalizedApiBase());
+  return true;
 }
 
 async function apiRequest(path, options = {}) {
@@ -685,17 +714,6 @@ async function apiRequest(path, options = {}) {
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || data.error || "api_error");
   return data;
-}
-
-async function checkServerConnection() {
-  try {
-    await apiRequest("/health");
-    state.toast = t("serverConnected");
-  } catch {
-    state.toast = t("serverFailed");
-  }
-  saveSettings();
-  render();
 }
 
 async function createOnlineRoom() {
@@ -715,12 +733,36 @@ async function createOnlineRoom() {
       }),
     });
     state.roomCode = room.code;
+    applyOnlineRoom(room, "p1");
+    state.phase = "onlineRoom";
     state.toast = t("onlineRoomCreated");
     track("onlineRoomCreate");
   } catch {
     state.toast = t("serverFailed");
   }
   saveSettings();
+  render();
+}
+
+async function quickMatch() {
+  try {
+    const result = await apiRequest("/api/match/quick", {
+      method: "POST",
+      body: JSON.stringify({
+        name: cleanText(state.onlineName || state.customNames[0], t("me")),
+        lang: state.lang,
+        packId: "kpop",
+        questionThemeId: "v01d",
+        themeId: "idol-backstage",
+      }),
+    });
+    applyOnlineRoom(result.room, result.player.id);
+    state.phase = "onlineRoom";
+    state.toast = "";
+    track("quickMatch");
+  } catch {
+    state.toast = t("serverFailed");
+  }
   render();
 }
 
@@ -735,8 +777,111 @@ function roomInviteUrl() {
   url.searchParams.set("players", String(state.playerCount));
   url.searchParams.set("lang", state.lang);
   url.searchParams.set("pl", state.playerLangs.slice(0, state.playerCount).join(""));
-  if (apiEnabled()) url.searchParams.set("api", normalizedApiBase());
+  if (location.hostname === "localhost" && state.apiBaseUrl !== DEFAULT_API_BASE_URL) url.searchParams.set("api", state.apiBaseUrl);
   return url.toString();
+}
+
+function applyOnlineRoom(room, playerId = state.onlinePlayerId) {
+  state.onlineRoom = room;
+  state.onlinePlayerId = playerId || state.onlinePlayerId;
+  state.roomCode = room.code;
+  state.playerCount = room.playerCount;
+  if (room.pack?.id) state.selectedPack = room.pack.id;
+  if (room.theme?.id) state.selectedTheme = room.theme.id;
+  if (room.questionTheme?.id) state.selectedQuestionTheme = room.questionTheme.id;
+  state.answers = room.answers.map((answer) => ({
+    player: answer.playerName,
+    text: answer.text || "",
+    question: answer.question || "",
+    role: answer.role || "",
+    suspicious: room.result?.fakePlayerId === answer.playerId,
+  }));
+}
+
+async function fetchOnlineRoom(renderAfter = true) {
+  if (!state.roomCode) return null;
+  try {
+    const suffix = state.onlinePlayerId ? `?playerId=${encodeURIComponent(state.onlinePlayerId)}` : "";
+    const room = await apiRequest(`/api/rooms/${state.roomCode}${suffix}`);
+    applyOnlineRoom(room);
+    if (renderAfter) render();
+    return room;
+  } catch {
+    if (renderAfter) {
+      state.toast = t("serverFailed");
+      render();
+    }
+    return null;
+  }
+}
+
+async function joinOnlineRoom() {
+  try {
+    const result = await apiRequest(`/api/rooms/${state.roomCode}/join`, {
+      method: "POST",
+      body: JSON.stringify({
+        name: cleanText(state.onlineName, t("me")),
+        lang: state.lang,
+      }),
+    });
+    applyOnlineRoom(result.room, result.player.id);
+    state.phase = "onlineRoom";
+    state.toast = "";
+  } catch {
+    state.toast = t("serverFailed");
+  }
+  render();
+}
+
+async function startOnlineRoom() {
+  try {
+    const room = await apiRequest(`/api/rooms/${state.roomCode}/start`, {
+      method: "POST",
+      body: JSON.stringify({ playerId: state.onlinePlayerId }),
+    });
+    applyOnlineRoom(room);
+    state.phase = "onlineRoom";
+  } catch {
+    state.toast = t("serverFailed");
+  }
+  render();
+}
+
+async function submitOnlineAnswer() {
+  const answer = cleanText(state.currentAnswer);
+  if (!answer) {
+    state.toast = t("answerRequired");
+    render();
+    return;
+  }
+  try {
+    const room = await apiRequest(`/api/rooms/${state.roomCode}/answers`, {
+      method: "POST",
+      body: JSON.stringify({ playerId: state.onlinePlayerId, text: answer }),
+    });
+    state.currentAnswer = "";
+    applyOnlineRoom(room);
+  } catch {
+    state.toast = t("serverFailed");
+  }
+  render();
+}
+
+async function castOnlineVote(playerId) {
+  try {
+    const room = await apiRequest(`/api/rooms/${state.roomCode}/votes`, {
+      method: "POST",
+      body: JSON.stringify({ playerId: state.onlinePlayerId, targetId: playerId }),
+    });
+    applyOnlineRoom(room);
+  } catch {
+    state.toast = t("serverFailed");
+  }
+  render();
+}
+
+function isOnlineHost() {
+  return state.onlinePlayerId === "p1";
 }
 
 function resultText() {
@@ -784,12 +929,24 @@ function profileAvatarMarkup(extraClass = "") {
 
 function fullBodyAvatarMarkup() {
   const aura = dressOption("aura", state.selectedAura).color || "#ffd166";
+  const item = dressOption("item", state.selectedItem);
+  const hat = dressOption("hat", state.selectedHat);
+  const face = dressOption("face", state.selectedFace);
+  const back = dressOption("back", state.selectedBack);
   return `
     <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="--aura:${aura};">
+      ${back.id !== "none" ? `<span class="closet-back">${back.symbol || ""}</span>` : ""}
       <span class="stage-aura"></span>
       ${spriteCellMarkup(state.selectedAvatar % characterSetForProfile().columns, selectedPoseIndex(), "profile-sprite")}
+      ${hat.id !== "none" ? `<span class="closet-hat">${hat.symbol || ""}</span>` : ""}
+      ${face.id !== "none" ? `<span class="closet-face">${face.symbol || ""}</span>` : ""}
+      <span class="closet-hand-item">${item.symbol || ""}</span>
     </div>
   `;
+}
+
+function rarityClass(item) {
+  return `rarity-${String(item.rarity || "N").toLowerCase()}`;
 }
 
 function selectedPack() {
@@ -1086,7 +1243,7 @@ function profileView() {
         <div>
           <strong>${t("me")}</strong>
           <p>${group.name} · ${biasStyleLabel(state.selectedBiasStyle)}</p>
-          <small>${dressLabel("hair", state.selectedHair)} / ${dressLabel("outfit", state.selectedOutfit)} / ${dressLabel("item", state.selectedItem)} / ${frameLabel(state.selectedFrame)} ${t("frameApplied")}</small>
+          <small>${dressLabel("hair", state.selectedHair)} / ${dressLabel("outfit", state.selectedOutfit)} / ${dressLabel("hat", state.selectedHat)} / ${dressLabel("back", state.selectedBack)} / ${frameLabel(state.selectedFrame)} ${t("frameApplied")}</small>
         </div>
       </div>
       <div class="tab-row">
@@ -1111,13 +1268,17 @@ function profileView() {
           `).join("")}
         </div>
         ${settings.profileCategories.map((type) => `
-          <div class="option-group dress-group">
+          <div class="closet-group">
             <span>${t(type)}</span>
+            <div class="closet-grid">
             ${dressOptions(type).map((item) => `
-              <button class="${state[selectedDressKey(type)] === item.id ? "selected" : ""}" data-dress-type="${type}" data-dress-id="${item.id}">
-                ${dressLabel(type, item.id)}<small>${item.symbol || ""}</small>
+              <button class="${state[selectedDressKey(type)] === item.id ? "selected" : ""} ${rarityClass(item)}" data-dress-type="${type}" data-dress-id="${item.id}">
+                <b>${item.symbol || item.label.slice(0, 1)}</b>
+                <em>${dressLabel(type, item.id)}</em>
+                <small>${item.rarity || "N"}</small>
               </button>
             `).join("")}
+            </div>
           </div>
         `).join("")}
       ` : ""}
@@ -1169,7 +1330,7 @@ function roomCreateView() {
         <strong>${t("createRoomTitle")}</strong>
       </div>
       <div class="room-preview">
-        <span>ROOM ${state.roomCode}</span>
+        <span>ONLINE ROOM</span>
         <strong>${themeLabel(state.selectedTheme)}</strong>
         <p>${selectedPack().name}${selectedQuestionThemeLabel() ? ` · ${selectedQuestionThemeLabel()}` : ""} · ${themeVibe(state.selectedTheme)}</p>
       </div>
@@ -1204,19 +1365,7 @@ function roomCreateView() {
           `).join("")}
         </div>
       ` : ""}
-      <div class="invite-box">
-        <span>${t("inviteLink")}</span>
-        <p>${roomInviteUrl()}</p>
-      </div>
-      <div class="server-box">
-        <label>
-          <span>${t("apiServer")}</span>
-          <input data-api-base="true" value="${state.apiBaseUrl}" placeholder="https://your-service.up.railway.app" />
-        </label>
-        <button class="secondary full" data-action="server-room">${t("createOnlineRoom")}</button>
-      </div>
-      <button class="primary full" data-action="copy-invite">${t("copyInvite")}</button>
-      <button class="secondary full" data-action="party-ready">${t("localDemo")}</button>
+      <button class="primary full" data-action="party-ready">${t("localDemo")}</button>
       <button class="text-button" data-action="back-lobby">${t("backHome")}</button>
     </section>
   `);
@@ -1235,10 +1384,120 @@ function joinRoomView() {
         <p>${selectedPack().name} ${t("packSuffix")} · ${state.playerCount}${t("playersSuffix")}</p>
       </div>
       <p>${t("joinBody")}</p>
+      <label class="answer-field">
+        <span>${t("joinAs")}</span>
+        <input data-online-name="true" value="${state.onlineName || state.customNames[0]}" maxlength="10" />
+      </label>
       <button class="primary full" data-action="party-ready">${t("joinRoom")}</button>
       <button class="secondary full" data-action="solo-start">${t("trySolo")}</button>
     </section>
   `);
+}
+
+function onlineRoomView() {
+  const room = state.onlineRoom;
+  if (!room) {
+    joinRoomView();
+    return;
+  }
+  const me = room.players.find((player) => player.id === state.onlinePlayerId);
+  shell(`
+    ${quitBar()}
+    <section class="panel room-panel">
+      <div class="section-head">
+        <span>ROOM ${room.code}</span>
+        <strong>${room.status === "lobby" ? t("waitingRoom") : room.status.toUpperCase()}</strong>
+      </div>
+      <div class="room-preview">
+        <span>${room.pack.name} · ${room.questionTheme.name}</span>
+        <strong>${room.theme.label}</strong>
+        <p>${me ? `${me.name} · ${me.lang.toUpperCase()}` : t("waitingPlayers")}</p>
+      </div>
+      ${room.status === "lobby" ? `
+        <div class="invite-box">
+          <span>${t("inviteLink")}</span>
+          <p>${roomInviteUrl()}</p>
+        </div>
+        <button class="secondary full" data-action="copy-invite">${t("copyInvite")}</button>
+        <div class="players">
+          ${room.players.map((player) => `
+            <article>
+              ${avatarMarkup(player.avatarIndex || 0)}
+              <span>${player.name}</span>
+              <small>${player.connected ? t("statusJoined") : t("statusWait")}</small>
+            </article>
+          `).join("")}
+        </div>
+        ${isOnlineHost() ? `<button class="primary full" data-action="online-start">${t("onlineStart")}</button>` : `<button class="secondary full" data-action="online-refresh">${t("refresh")}</button>`}
+      ` : ""}
+      ${room.status === "answering" ? onlineAnswerMarkup(room) : ""}
+      ${room.status === "voting" ? onlineVoteMarkup(room) : ""}
+      ${room.status === "result" ? onlineResultMarkup(room) : ""}
+      <button class="secondary full" data-action="online-refresh">${t("refresh")}</button>
+    </section>
+  `);
+}
+
+function onlineAnswerMarkup(room) {
+  const answer = room.myAnswer;
+  if (!answer) return `<p>${t("waitOthers")}</p>`;
+  if (answer.submitted) return `<p>${t("submitted")} · ${t("waitOthers")}</p>`;
+  return `
+    <label class="answer-field">
+      <span>${answer.role === "fakeQuestion" ? t("fakeQuestion") : t("commonQuestion")}</span>
+      <strong class="question">${answer.question}</strong>
+      <input data-answer-input="true" value="${state.currentAnswer}" maxlength="18" placeholder="${t("answerPlaceholder")}" />
+    </label>
+    <button class="primary full" data-action="online-answer">${t("submitDone")}</button>
+  `;
+}
+
+function onlineVoteMarkup(room) {
+  return `
+    <p>${t("onlineVoteReady")}</p>
+    <section class="answers">
+      ${room.answers.map((answer, index) => `
+        <article class="answer-card">
+          ${avatarMarkup(index)}
+          <div>
+            <strong>${answer.playerName}</strong>
+            <p>${answer.text}</p>
+          </div>
+        </article>
+      `).join("")}
+    </section>
+    <div class="vote-grid">
+      ${room.players.map((player) => `
+        <button data-online-vote="${player.id}">
+          ${avatarMarkup(player.avatarIndex || 0)}
+          <strong>${player.name}</strong>
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
+function onlineResultMarkup(room) {
+  const result = room.result;
+  return `
+    <section class="result ${result.citizenWin ? "win" : "lose"}">
+      <div class="tag">${result.citizenWin ? t("citizenWin") : t("fakeWin")}</div>
+      <h2>${t("fakeIs")} ${result.fakePlayerName}</h2>
+    </section>
+    <section class="answers">
+      ${room.answers.map((answer, index) => `
+        <article class="answer-card ${answer.playerId === result.fakePlayerId ? "highlight" : ""}">
+          ${avatarMarkup(index)}
+          <div>
+            <strong>${answer.playerName}</strong>
+            <p>${answer.text}</p>
+            <small>${answer.role === "fakeQuestion" ? t("fakeQuestion") : t("commonQuestion")}: ${answer.question}</small>
+          </div>
+          <span class="votes">${result.tally.find((item) => item.playerId === answer.playerId)?.count || 0}</span>
+        </article>
+      `).join("")}
+    </section>
+  `;
 }
 
 function guideView() {
@@ -1334,11 +1593,6 @@ function settingsView() {
         <strong>${t("settings")}</strong>
       </div>
       ${languageSelectMarkup(state.lang, "data-app-lang", t("appLanguage"))}
-      <label class="server-field">
-        <span>${t("apiServer")}</span>
-        <input data-api-base="true" value="${state.apiBaseUrl}" placeholder="https://your-service.up.railway.app" />
-      </label>
-      <button class="secondary full" data-action="check-server">${t("connectServer")}</button>
       <div class="option-group">
         <span>${t("roomTheme")}</span>
         ${themes.map((theme) => `
@@ -1680,6 +1934,7 @@ function streamerPanel() {
 }
 
 function render() {
+  clearInterval(onlinePollTimer);
   document.title = t("title");
   if (state.phase === "lobby") lobbyView();
   if (state.phase === "joinRoom") joinRoomView();
@@ -1699,6 +1954,10 @@ function render() {
   if (state.phase === "talk") talkView();
   if (state.phase === "vote") voteView();
   if (state.phase === "result") resultView();
+  if (state.phase === "onlineRoom") {
+    onlinePollTimer = setInterval(() => fetchOnlineRoom(true), 3000);
+  }
+  if (state.phase === "onlineRoom") onlineRoomView();
 }
 
 app.addEventListener("click", async (event) => {
@@ -1716,6 +1975,9 @@ app.addEventListener("click", async (event) => {
     }
   }
   if (button.dataset.action === "solo-start") startSolo();
+  if (button.dataset.action === "quick-match") {
+    await quickMatch();
+  }
   if (button.dataset.action === "copy-invite") {
     copyText(roomInviteUrl(), t("copiedInvite"));
     track("inviteCopy");
@@ -1744,12 +2006,6 @@ app.addEventListener("click", async (event) => {
     state.phase = "settings";
     render();
   }
-  if (button.dataset.action === "check-server") {
-    await checkServerConnection();
-  }
-  if (button.dataset.action === "server-room") {
-    await createOnlineRoom();
-  }
   if (button.dataset.action === "back") {
     goBack();
   }
@@ -1759,9 +2015,12 @@ app.addEventListener("click", async (event) => {
     render();
   }
   if (button.dataset.action === "party-ready") {
-    state.phase = "partyReady";
-    render();
+    if (state.phase === "joinRoom") await joinOnlineRoom();
+    else await createOnlineRoom();
   }
+  if (button.dataset.action === "online-start") await startOnlineRoom();
+  if (button.dataset.action === "online-refresh") await fetchOnlineRoom();
+  if (button.dataset.action === "online-answer") await submitOnlineAnswer();
   if (button.dataset.action === "back-lobby") {
     state.phase = "lobby";
     window.history.replaceState({}, "", window.location.pathname);
@@ -1834,6 +2093,7 @@ app.addEventListener("click", async (event) => {
     saveSettings();
     render();
   }
+  if (button.dataset.onlineVote !== undefined) await castOnlineVote(button.dataset.onlineVote);
   if (button.dataset.vote !== undefined) castVote(Number(button.dataset.vote));
 });
 
@@ -1847,9 +2107,8 @@ app.addEventListener("input", (event) => {
   if (input.dataset.answerInput) {
     state.currentAnswer = input.value;
   }
-  if (input.dataset.apiBase) {
-    state.apiBaseUrl = input.value.trim();
-    saveSettings();
+  if (input.dataset.onlineName) {
+    state.onlineName = cleanText(input.value, state.customNames[0]);
   }
 });
 
