@@ -1408,7 +1408,7 @@ function profileView() {
           <div class="closet-grid">
           ${dressOptions(activeCategory).map((item) => `
             <button class="${state[selectedDressKey(activeCategory)] === item.id ? "selected" : ""} ${rarityClass(item)}" data-dress-type="${activeCategory}" data-dress-id="${item.id}">
-              <b>${item.asset ? `<img src="${item.asset}" alt="" />` : item.symbol || item.label.slice(0, 1)}</b>
+              <b>${item.asset ? `<img src="${item.thumb || item.asset}" alt="" />` : item.symbol || item.label.slice(0, 1)}</b>
               <em>${dressLabel(activeCategory, item.id)}</em>
               <small>${item.rarity || "N"}</small>
             </button>
