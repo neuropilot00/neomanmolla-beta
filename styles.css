@@ -165,6 +165,28 @@ p {
   font-size: 0.9rem;
 }
 
+.language-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.language-row button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.language-row button.selected {
+  border-color: rgba(184, 243, 95, 0.58);
+  color: #111;
+  background: var(--lime);
+}
+
 .hero-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

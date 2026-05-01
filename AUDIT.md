@@ -12,8 +12,10 @@ Purpose: 실제 테스트 유저에게 링크를 보내 검증할 수 있는 모
 - Party demo: 4-6 player flow simulated on one device.
 - Party input: each local player can enter a real answer after viewing their private question.
 - Data-driven content: questions, packs, avatars, frames, themes, and metrics live in `game-data.js`.
+- Localization: Korean and Japanese UI copy, question packs, pack metadata, metrics, themes, and player defaults.
 - Product surfaces: room creation, profile setup, question packs, result card, beta feedback screen.
 - Room links: static URL query parameters carry room code, pack, theme, and player count for tester onboarding.
+- Language links: `lang=ko` and `lang=ja` are preserved in invite links.
 - Local persistence: profile/pack/theme settings and lightweight beta event counters are stored in `localStorage`.
 
 ## Monetization Hypothesis
