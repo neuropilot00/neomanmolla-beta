@@ -1,10 +1,13 @@
 const gameData = window.NEOMANMOLLA_DATA;
 const { avatars, frames, metrics, packs, playerNames, themes } = gameData;
+const STORAGE_KEY = "neomanmolla-beta-state";
+const EVENTS_KEY = "neomanmolla-beta-events";
 
 const state = {
   mode: "party",
   playerCount: 5,
   phase: "lobby",
+  roomCode: "7294",
   roundIndex: 0,
   fakeIndex: 0,
   hostIndex: 0,
@@ -23,12 +26,112 @@ const state = {
   selectedFrame: frames[0].id,
   selectedTheme: themes[0],
   selectedPack: packs[0].name,
+  toast: "",
 };
 
 const app = document.querySelector("#app");
 
 function sample(list) {
   return list[Math.floor(Math.random() * list.length)];
+}
+
+function generateRoomCode() {
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
+
+function saveSettings() {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      selectedAvatar: state.selectedAvatar,
+      selectedFrame: state.selectedFrame,
+      selectedPack: state.selectedPack,
+      selectedTheme: state.selectedTheme,
+    }),
+  );
+}
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    if (Number.isInteger(saved.selectedAvatar)) state.selectedAvatar = saved.selectedAvatar;
+    if (frames.some((frame) => frame.id === saved.selectedFrame)) state.selectedFrame = saved.selectedFrame;
+    if (packs.some((pack) => pack.name === saved.selectedPack)) state.selectedPack = saved.selectedPack;
+    if (themes.includes(saved.selectedTheme)) state.selectedTheme = saved.selectedTheme;
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
+
+function applyUrlRoom() {
+  const params = new URLSearchParams(window.location.search);
+  const room = params.get("room");
+  if (!room) return;
+
+  state.roomCode = room;
+  state.selectedPack = params.get("pack") || state.selectedPack;
+  state.selectedTheme = params.get("theme") || state.selectedTheme;
+  state.playerCount = Number(params.get("players")) || 4;
+  state.phase = "joinRoom";
+}
+
+function track(eventName) {
+  const events = JSON.parse(localStorage.getItem(EVENTS_KEY) || "{}");
+  events[eventName] = (events[eventName] || 0) + 1;
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(events));
+}
+
+function betaStats() {
+  return JSON.parse(localStorage.getItem(EVENTS_KEY) || "{}");
+}
+
+function roomInviteUrl() {
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.hash = "";
+  url.searchParams.set("room", state.roomCode);
+  url.searchParams.set("pack", state.selectedPack);
+  url.searchParams.set("theme", state.selectedTheme);
+  url.searchParams.set("players", String(state.playerCount));
+  return url.toString();
+}
+
+function resultText() {
+  const fake = state.answers[state.fakeIndex];
+  const verdict = state.lastSuccess ? "맞혔다" : "속았다";
+  const round = currentRound();
+  return [
+    `너만 몰라 결과: ${verdict}`,
+    `가짜는 ${fake.player}`,
+    `공통 질문: ${round.innocent}`,
+    `가짜 질문: ${round.fake}`,
+    `${selectedPack().name} 팩`,
+    roomInviteUrl(),
+  ].join("\n");
+}
+
+function feedbackText() {
+  const stats = betaStats();
+  return [
+    "너만 몰라 베타 피드백",
+    `질문팩: ${state.selectedPack}`,
+    `방 테마: ${state.selectedTheme}`,
+    `혼자 플레이 시작: ${stats.soloStart || 0}`,
+    `결과 확인: ${stats.resultView || 0}`,
+    "1. 룰 이해:",
+    "2. 왜 가짜인지 납득:",
+    "3. 친구에게 보낼 의향:",
+  ].join("\n");
+}
+
+async function copyText(text, message) {
+  try {
+    await navigator.clipboard.writeText(text);
+    state.toast = message;
+  } catch {
+    state.toast = "복사가 막혔어요. HTTPS 배포 링크에서는 정상 동작합니다";
+  }
+  render();
 }
 
 function players() {
@@ -65,6 +168,7 @@ function currentRound() {
 }
 
 function startGame() {
+  track("partyStart");
   state.mode = "party";
   state.phase = "roles";
   state.roundIndex = Math.floor(Math.random() * activeRounds().length);
@@ -85,6 +189,7 @@ function startGame() {
 }
 
 function startSolo() {
+  track("soloStart");
   state.mode = "solo";
   state.playerCount = 4;
   state.score = 0;
@@ -163,6 +268,8 @@ function castVote(index) {
   state.votes[0] = index;
   state.phase = "result";
   state.log.unshift(`${players()[0].name}님이 ${players()[index].name}님에게 투표`);
+  state.lastSuccess = index === state.fakeIndex;
+  track("resultView");
   render();
 }
 
@@ -174,6 +281,7 @@ function finishSoloVote(index) {
   state.score += success ? base + Math.min(state.streak * 15, 90) : 0;
   state.lives -= success ? 0 : 1;
   state.phase = state.lives <= 0 ? "soloGameOver" : "soloResult";
+  track("resultView");
   render();
 }
 
@@ -206,11 +314,13 @@ function shell(content) {
           <p class="eyebrow">4-6인 실시간 파티 추리</p>
           <h1>너만 몰라</h1>
         </div>
-        <div class="room-code">ROOM 7294</div>
+        <div class="room-code">ROOM ${state.roomCode}</div>
       </header>
+      ${state.toast ? `<div class="toast">${state.toast}</div>` : ""}
       ${content}
     </section>
   `;
+  state.toast = "";
 }
 
 function lobbyView() {
@@ -272,10 +382,10 @@ function roomCreateView() {
     <section class="panel room-panel">
       <div class="section-head">
         <span>Create Room</span>
-        <strong>방장이 돈 내는 화면</strong>
+        <strong>테스트 링크 만들기</strong>
       </div>
       <div class="room-preview">
-        <span>ROOM 7294</span>
+        <span>ROOM ${state.roomCode}</span>
         <strong>${state.selectedTheme}</strong>
         <p>${state.selectedPack} 질문팩 · 4명 · 링크 초대</p>
       </div>
@@ -293,8 +403,32 @@ function roomCreateView() {
           </button>
         `).join("")}
       </div>
-      <button class="primary full" data-action="party-ready">방 만들기</button>
+      <div class="invite-box">
+        <span>초대 링크</span>
+        <p>${roomInviteUrl()}</p>
+      </div>
+      <button class="primary full" data-action="copy-invite">초대 링크 복사</button>
+      <button class="secondary full" data-action="party-ready">로컬 데모 시작</button>
       <button class="text-button" data-action="back-lobby">처음으로</button>
+    </section>
+  `);
+}
+
+function joinRoomView() {
+  shell(`
+    <section class="panel room-panel">
+      <div class="section-head">
+        <span>Join Room</span>
+        <strong>친구가 보낸 테스트 방</strong>
+      </div>
+      <div class="room-preview">
+        <span>ROOM ${state.roomCode}</span>
+        <strong>${state.selectedTheme}</strong>
+        <p>${state.selectedPack} 질문팩 · ${state.playerCount}명</p>
+      </div>
+      <p>지금 베타는 한 기기에서 흐름을 검증하는 로컬 데모입니다. 실시간 동기화는 다음 개발 단계입니다.</p>
+      <button class="primary full" data-action="party-ready">방 참가하기</button>
+      <button class="secondary full" data-action="solo-start">혼자 먼저 해보기</button>
     </section>
   `);
 }
@@ -548,6 +682,7 @@ function resultView() {
           <div>
             <strong>${player.name}</strong>
             <p>${state.answers[index].text}</p>
+            <small>${state.answers[index].role}: ${state.answers[index].question}</small>
           </div>
           <span class="votes">${tally[index]}</span>
         </article>
@@ -565,16 +700,29 @@ function resultShareCard(fake) {
       <span>결과 카드</span>
       <strong>${grade} · 가짜는 ${fake.player}</strong>
       <p>${selectedPack().name} 팩에서 ${state.questionNo}번째 문제. 친구에게 보여주기 좋은 문구입니다.</p>
+      <button class="copy-button" data-action="copy-result">결과 복사</button>
     </section>
   `;
 }
 
 function partyResultCard(fake) {
+  const round = currentRound();
   return `
     <section class="share-card">
       <span>방 결과</span>
       <strong>오늘의 가짜: ${fake.name}</strong>
       <p>${state.selectedTheme} · ${state.selectedPack} 팩 · 다음 베타에서는 이 카드가 이미지로 저장됩니다.</p>
+      <button class="copy-button" data-action="copy-result">결과 복사</button>
+    </section>
+    <section class="question-reveal">
+      <article>
+        <span>공통 질문</span>
+        <strong>${round.innocent}</strong>
+      </article>
+      <article class="fake-question">
+        <span>가짜 질문</span>
+        <strong>${round.fake}</strong>
+      </article>
     </section>
   `;
 }
@@ -589,6 +737,7 @@ function feedbackView() {
       <article><strong>1. 첫판 룰을 바로 이해했나요?</strong><p>10초 안에 이해 못 하면 온보딩을 고쳐야 합니다.</p></article>
       <article><strong>2. 왜 가짜인지 납득됐나요?</strong><p>질문 공개와 답변 비교가 핵심 검증 포인트입니다.</p></article>
       <article><strong>3. 친구에게 링크를 보낼 만큼 웃겼나요?</strong><p>이 대답이 아니면 질문팩을 더 세게 만들어야 합니다.</p></article>
+      <button class="secondary full" data-action="copy-feedback">피드백 양식 복사</button>
       <button class="primary full" data-action="back-lobby">메인으로</button>
     </section>
   `);
@@ -659,6 +808,7 @@ function streamerPanel() {
 
 function render() {
   if (state.phase === "lobby") lobbyView();
+  if (state.phase === "joinRoom") joinRoomView();
   if (state.phase === "profile") profileView();
   if (state.phase === "roomCreate") roomCreateView();
   if (state.phase === "feedback") feedbackView();
@@ -679,11 +829,24 @@ app.addEventListener("click", (event) => {
 
   if (button.dataset.count) setPlayerCount(Number(button.dataset.count));
   if (button.dataset.action === "solo-start") startSolo();
+  if (button.dataset.action === "copy-invite") {
+    copyText(roomInviteUrl(), "초대 링크를 복사했습니다");
+    track("inviteCopy");
+  }
+  if (button.dataset.action === "copy-result") {
+    copyText(resultText(), "결과를 복사했습니다");
+    track("resultCopy");
+  }
+  if (button.dataset.action === "copy-feedback") {
+    copyText(feedbackText(), "피드백 양식을 복사했습니다");
+    track("feedbackCopy");
+  }
   if (button.dataset.action === "profile") {
     state.phase = "profile";
     render();
   }
   if (button.dataset.action === "room-create") {
+    state.roomCode = generateRoomCode();
     state.phase = "roomCreate";
     render();
   }
@@ -697,6 +860,7 @@ app.addEventListener("click", (event) => {
   }
   if (button.dataset.action === "back-lobby") {
     state.phase = "lobby";
+    window.history.replaceState({}, "", window.location.pathname);
     render();
   }
   if (button.dataset.action === "quit") {
@@ -713,21 +877,27 @@ app.addEventListener("click", (event) => {
   if (button.dataset.action === "solo-next") nextSoloRound();
   if (button.dataset.avatar !== undefined) {
     state.selectedAvatar = Number(button.dataset.avatar);
+    saveSettings();
     render();
   }
   if (button.dataset.frame !== undefined) {
     state.selectedFrame = button.dataset.frame;
+    saveSettings();
     render();
   }
   if (button.dataset.theme !== undefined) {
     state.selectedTheme = button.dataset.theme;
+    saveSettings();
     render();
   }
   if (button.dataset.pack !== undefined) {
     state.selectedPack = button.dataset.pack;
+    saveSettings();
     render();
   }
   if (button.dataset.vote !== undefined) castVote(Number(button.dataset.vote));
 });
 
+loadSettings();
+applyUrlRoom();
 render();

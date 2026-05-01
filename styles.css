@@ -93,6 +93,17 @@ p {
   font-weight: 900;
 }
 
+.toast {
+  margin-bottom: 8px;
+  border: 1px solid rgba(184, 243, 95, 0.35);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--lime);
+  background: rgba(184, 243, 95, 0.09);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
 .panel,
 .hero-card,
 .cast-panel,
@@ -354,7 +365,8 @@ p {
 }
 
 .room-preview span,
-.option-group > span {
+.option-group > span,
+.invite-box span {
   display: block;
   color: var(--muted);
   font-size: 0.75rem;
@@ -382,6 +394,21 @@ p {
 .option-group small {
   color: var(--gold);
   font-size: 0.72rem;
+}
+
+.invite-box {
+  border: 1px dashed rgba(184, 243, 95, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(184, 243, 95, 0.06);
+}
+
+.invite-box p {
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .count-row {
@@ -780,6 +807,17 @@ button.answer-card {
 .feedback-panel article p {
   margin-top: 5px;
   font-size: 0.82rem;
+}
+
+.copy-button {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 209, 102, 0.32);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 900;
 }
 
 .feedback-panel {

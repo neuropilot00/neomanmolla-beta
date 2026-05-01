@@ -12,6 +12,8 @@ Purpose: 실제 테스트 유저에게 링크를 보내 검증할 수 있는 모
 - Party demo: 4-6 player flow simulated on one device.
 - Data-driven content: questions, packs, avatars, frames, themes, and metrics live in `game-data.js`.
 - Product surfaces: room creation, profile setup, question packs, result card, beta feedback screen.
+- Room links: static URL query parameters carry room code, pack, theme, and player count for tester onboarding.
+- Local persistence: profile/pack/theme settings and lightweight beta event counters are stored in `localStorage`.
 
 ## Monetization Hypothesis
 
@@ -38,7 +40,7 @@ Secondary:
 - Runs as plain static files.
 - No backend yet.
 - No real multiplayer synchronization yet.
-- No persistent analytics yet.
+- No server-side analytics yet. Current counters are local-only.
 - No payment, account, or database integration.
 
 ## Deployment Notes
