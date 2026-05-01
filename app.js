@@ -2233,6 +2233,7 @@ app.addEventListener("click", async (event) => {
     const stateKey = selectedDressKey(button.dataset.dressType);
     if (dressOptions(button.dataset.dressType).some((item) => item.id === button.dataset.dressId)) {
       state[stateKey] = button.dataset.dressId;
+      if (button.dataset.dressType !== "preset") state.selectedPreset = "custom";
       saveSettings();
       render();
     }

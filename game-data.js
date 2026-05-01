@@ -6,7 +6,7 @@ window.NEOMANMOLLA_DATA = {
     ],
     playerCounts: [4, 5, 6],
     defaultPlayerLangs: ["ko", "ja", "ko", "ja", "ko", "ja"],
-    profileCategories: ["preset", "back", "aura"],
+    profileCategories: ["preset", "body", "hair", "top", "pants", "shoes", "item", "back", "aura"],
     profileTabs: ["parts", "artist", "frame"],
     characterPoses: [
       { id: "idle", label: "기본" },
@@ -68,6 +68,7 @@ window.NEOMANMOLLA_DATA = {
   ],
   dressUp: {
     preset: [
+      { id: "custom", label: "직접 꾸미기", symbol: "DIY", rarity: "N" },
       { id: "wolf-guitar", label: "블랙 기타", symbol: "01", rarity: "SR", asset: "./assets/avatar/presets/wolf-guitar.png", thumb: "./assets/avatar/presets/wolf-guitar.png" },
       { id: "red-drummer", label: "레드 드러머", symbol: "02", rarity: "SR", asset: "./assets/avatar/presets/red-drummer.png", thumb: "./assets/avatar/presets/red-drummer.png" },
       { id: "ash-keyboard", label: "애쉬 키보드", symbol: "03", rarity: "SR", asset: "./assets/avatar/presets/ash-keyboard.png", thumb: "./assets/avatar/presets/ash-keyboard.png" },
