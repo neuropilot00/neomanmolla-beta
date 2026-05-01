@@ -17,6 +17,11 @@
   box-sizing: border-box;
 }
 
+html {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -178,6 +183,9 @@ p {
 .home-screen {
   display: grid;
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
   min-height: calc(100vh - 90px);
   grid-template-rows: auto auto auto 1fr;
 }
@@ -189,6 +197,7 @@ p {
 .hero-slider {
   display: flex;
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
@@ -306,10 +315,13 @@ p {
 .home-primary-actions {
   display: grid;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .home-action {
+  min-width: 0;
   min-height: 74px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -349,6 +361,9 @@ p {
 
 .home-tools,
 .home-featured {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
@@ -358,12 +373,15 @@ p {
 
 .home-tool-row {
   display: grid;
+  width: 100%;
+  max-width: 100%;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 7px;
   margin-top: 9px;
 }
 
 .home-tool-row button {
+  min-width: 0;
   min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -376,6 +394,8 @@ p {
 
 .home-pack-row {
   display: grid;
+  width: 100%;
+  max-width: 100%;
   grid-auto-flow: column;
   grid-auto-columns: minmax(136px, 42%);
   gap: 8px;
@@ -390,6 +410,7 @@ p {
 }
 
 .home-pack-row button {
+  min-width: 0;
   min-height: 88px;
   border: 1px solid rgba(247, 243, 234, 0.14);
   border-radius: 12px;
@@ -503,6 +524,7 @@ p {
 
   .home-primary-actions {
     gap: 7px;
+    grid-template-columns: 1fr;
   }
 
   .home-action {
@@ -512,6 +534,7 @@ p {
   }
 
   .home-action-main {
+    grid-column: auto;
     min-height: 68px;
   }
 
@@ -530,13 +553,13 @@ p {
   }
 
   .home-tool-row {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 5px;
     margin-top: 7px;
   }
 
   .home-tool-row button {
-    min-height: 38px;
+    min-height: 36px;
     border-radius: 9px;
     padding: 0 4px;
     font-size: 0.69rem;
