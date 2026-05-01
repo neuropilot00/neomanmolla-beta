@@ -26,6 +26,7 @@ const COPY = {
     featuredPacksBody: "지금 테스트하기 좋은 테마",
     homeUtilities: "내 공간",
     soloShort: "혼자 연습",
+    closetCategory: "에셋 카테고리",
     artistRegistry: "아티스트 등록 현황",
     registered: "등록됨",
     ownedArtist: "공식 아티스트",
@@ -185,6 +186,7 @@ const COPY = {
     featuredPacksBody: "今テストしやすいテーマ",
     homeUtilities: "マイスペース",
     soloShort: "一人で練習",
+    closetCategory: "アセットカテゴリ",
     artistRegistry: "アーティスト登録状況",
     registered: "登録済み",
     ownedArtist: "公式アーティスト",
@@ -350,7 +352,7 @@ const state = {
   selectedFrame: frames[0].id,
   selectedBiasStyle: biasStyles[0].id,
   selectedBody: dressUp.body[0].id,
-  selectedHair: dressUp.hair[0].id,
+  selectedHair: dressUp.hair[1].id,
   selectedEyes: dressUp.eyes[0].id,
   selectedLips: dressUp.lips[0].id,
   selectedBeauty: dressUp.beauty[0].id,
@@ -370,6 +372,7 @@ const state = {
   selectedQuestionTheme: packs[0].defaultQuestionTheme || "all",
   selectedAudiencePreset: settings.audiencePresets[0].id,
   profileTab: settings.profileTabs[0],
+  activeDressCategory: "hair",
   lang: "ko",
   customNames: [...playerNames],
   playerLangs: [...settings.defaultPlayerLangs],
@@ -674,6 +677,7 @@ function saveSettings() {
       customNames: state.customNames,
       playerLangs: state.playerLangs,
       lang: state.lang,
+      activeDressCategory: state.activeDressCategory,
     }),
   );
 }
@@ -696,6 +700,7 @@ function loadSettings() {
     if (validQuestionTheme(saved.selectedQuestionTheme)) state.selectedQuestionTheme = saved.selectedQuestionTheme;
     if (themes.some((theme) => themeId(theme) === saved.selectedTheme)) state.selectedTheme = saved.selectedTheme;
     if (supportedLang(saved.lang)) state.lang = saved.lang;
+    if (settings.profileCategories.includes(saved.activeDressCategory)) state.activeDressCategory = saved.activeDressCategory;
     if (Array.isArray(saved.customNames)) state.customNames = playerNameList().map((name, index) => cleanText(saved.customNames[index], name));
     else state.customNames = [...playerNameList()];
     if (Array.isArray(saved.playerLangs)) state.playerLangs = playerNames.map((_, index) => supportedLang(saved.playerLangs[index]) ? saved.playerLangs[index] : state.playerLangs[index]);
@@ -1011,42 +1016,17 @@ function profileAvatarMarkup(extraClass = "") {
 
 function fullBodyAvatarMarkup() {
   const aura = dressOption("aura", state.selectedAura).color || "#ffd166";
-  const item = dressOption("item", state.selectedItem);
-  const body = dressOption("body", state.selectedBody);
-  const hair = dressOption("hair", state.selectedHair);
-  const eyes = dressOption("eyes", state.selectedEyes);
-  const lips = dressOption("lips", state.selectedLips);
-  const beauty = dressOption("beauty", state.selectedBeauty);
-  const accessory = dressOption("accessory", state.selectedAccessory);
-  const top = dressOption("top", state.selectedTop);
-  const pants = dressOption("pants", state.selectedPants);
-  const shoes = dressOption("shoes", state.selectedShoes);
   const back = dressOption("back", state.selectedBack);
+  const layers = ["body", "pants", "shoes", "top", "hair", "eyes", "lips", "beauty", "accessory", "item"]
+    .map((type) => ({ type, item: dressOption(type, state[selectedDressKey(type)]) }))
+    .filter(({ item }) => item?.asset);
   return `
-    <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="--aura:${aura};--skin:${body.skin || "#f3b27d"};--hair:${hair.color || "#16181d"};--hair-accent:${hair.accent || hair.color || "#16181d"};--eyes:${eyes.color || "#17191f"};--lips:${lips.color || "#d86a70"};--top:${top.color || "#20232b"};--top-trim:${top.trim || "#ff4d6d"};--pants:${pants.color || "#17191f"};--shoes:${shoes.color || "#101114"};">
+    <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="--aura:${aura};">
       ${back.id !== "none" ? `<span class="closet-back">${back.symbol || ""}</span>` : ""}
       <span class="stage-aura"></span>
-      <span class="layered-character">
-        <i class="lc-shadow"></i>
-        <i class="lc-leg left"></i>
-        <i class="lc-leg right"></i>
-        <i class="lc-shoe left"></i>
-        <i class="lc-shoe right"></i>
-        <i class="lc-body"></i>
-        <i class="lc-arm left"></i>
-        <i class="lc-arm right"></i>
-        <i class="lc-hand left"></i>
-        <i class="lc-hand right"></i>
-        <i class="lc-neck"></i>
-        <i class="lc-head"></i>
-        <i class="lc-hair back"></i>
-        <i class="lc-hair front"></i>
-        <i class="lc-eye left"></i>
-        <i class="lc-eye right"></i>
-        <i class="lc-mouth"></i>
-        ${beauty.id !== "none" ? `<i class="lc-beauty ${beauty.id}">${beauty.symbol || "."}</i>` : ""}
-        ${accessory.id !== "none" ? `<i class="lc-accessory ${accessory.id}">${accessory.symbol || ""}</i>` : ""}
-        ${item.id !== "none" ? `<i class="lc-item">${item.symbol || ""}</i>` : ""}
+      <span class="asset-character">
+        <i class="asset-shadow"></i>
+        ${layers.map(({ type, item }) => `<img class="asset-layer asset-${type}" src="${item.asset}" alt="" />`).join("")}
       </span>
     </div>
   `;
@@ -1296,6 +1276,8 @@ function setupHeroSlider() {
   clearInterval(heroTimer);
   const slider = app.querySelector("[data-hero-slider]");
   if (!slider || slider.children.length < 2) return;
+  slider.scrollTo({ left: 0, behavior: "instant" });
+  state.heroTouchedAt = Date.now();
   slider.addEventListener("pointerdown", () => {
     state.heroTouchedAt = Date.now();
   });
@@ -1380,7 +1362,7 @@ function lobbyView() {
 function profileView() {
   const group = idolGroup(state.selectedIdolGroup);
   const tab = settings.profileTabs.includes(state.profileTab) ? state.profileTab : settings.profileTabs[0];
-  const avatarIndex = state.selectedAvatar % characterSetForProfile().columns;
+  const activeCategory = settings.profileCategories.includes(state.activeDressCategory) ? state.activeDressCategory : settings.profileCategories[0];
   shell(`
     <section class="panel profile-panel">
       <div class="section-head">
@@ -1401,13 +1383,6 @@ function profileView() {
         `).join("")}
       </div>
       ${tab === "parts" ? `
-        <div class="avatar-picker">
-          ${Array.from({ length: characterSetForProfile().columns }).map((_, index) => `
-            <button class="${avatarIndex === index ? "selected" : ""}" data-avatar="${index}">
-              ${spriteCellMarkup(index, selectedPoseIndex(), "picker-sprite")}
-            </button>
-          `).join("")}
-        </div>
         <div class="option-group dress-group">
           <span>${t("pose")}</span>
           ${settings.characterPoses.map((pose) => `
@@ -1416,20 +1391,26 @@ function profileView() {
             </button>
           `).join("")}
         </div>
-        ${settings.profileCategories.map((type) => `
-          <div class="closet-group">
-            <span>${t(type)}</span>
-            <div class="closet-grid">
-            ${dressOptions(type).map((item) => `
-              <button class="${state[selectedDressKey(type)] === item.id ? "selected" : ""} ${rarityClass(item)}" data-dress-type="${type}" data-dress-id="${item.id}">
-                <b>${item.symbol || item.label.slice(0, 1)}</b>
-                <em>${dressLabel(type, item.id)}</em>
-                <small>${item.rarity || "N"}</small>
-              </button>
+        <div class="closet-tabs">
+          <span>${t("closetCategory")}</span>
+          <div>
+            ${settings.profileCategories.map((type) => `
+              <button class="${activeCategory === type ? "selected" : ""}" data-dress-category="${type}">${t(type)}</button>
             `).join("")}
-            </div>
           </div>
-        `).join("")}
+        </div>
+        <div class="closet-group">
+          <span>${t(activeCategory)}</span>
+          <div class="closet-grid">
+          ${dressOptions(activeCategory).map((item) => `
+            <button class="${state[selectedDressKey(activeCategory)] === item.id ? "selected" : ""} ${rarityClass(item)}" data-dress-type="${activeCategory}" data-dress-id="${item.id}">
+              <b>${item.asset ? "IMG" : item.symbol || item.label.slice(0, 1)}</b>
+              <em>${dressLabel(activeCategory, item.id)}</em>
+              <small>${item.rarity || "N"}</small>
+            </button>
+          `).join("")}
+          </div>
+        </div>
       ` : ""}
       ${tab === "artist" ? `
         <div class="option-group">
@@ -2216,6 +2197,11 @@ app.addEventListener("click", async (event) => {
   }
   if (button.dataset.profileTab !== undefined && settings.profileTabs.includes(button.dataset.profileTab)) {
     state.profileTab = button.dataset.profileTab;
+    render();
+  }
+  if (button.dataset.dressCategory !== undefined && settings.profileCategories.includes(button.dataset.dressCategory)) {
+    state.activeDressCategory = button.dataset.dressCategory;
+    saveSettings();
     render();
   }
   if (button.dataset.dressType !== undefined && button.dataset.dressId !== undefined) {

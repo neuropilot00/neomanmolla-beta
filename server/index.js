@@ -358,6 +358,7 @@ function serveStatic(req, res, url) {
       ".json": "application/json; charset=utf-8",
       ".png": "image/png",
       ".webp": "image/webp",
+      ".svg": "image/svg+xml",
     }[ext] || "application/octet-stream";
     send(res, 200, data, { "Content-Type": type });
   });
