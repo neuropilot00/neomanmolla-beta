@@ -1,5 +1,5 @@
 const gameData = window.NEOMANMOLLA_DATA;
-const { avatars, biasStyles, dressUp, frames, heroSlides, idolGroups, notices, packs, playerNames, settings, themes } = gameData;
+const { avatars, biasStyles, characterSets, dressUp, frames, heroSlides, idolGroups, notices, packs, playerNames, settings, themes } = gameData;
 const STORAGE_KEY = "neomanmolla-beta-state";
 const EVENTS_KEY = "neomanmolla-beta-events";
 const COPY = {
@@ -30,9 +30,11 @@ const COPY = {
     outfit: "의상",
     item: "소품",
     aura: "오라",
+    pose: "포즈",
     parts: "꾸미기",
     artist: "최애",
     frame: "프레임",
+    back: "뒤로",
     createRoomTitle: "초대 링크 만들기",
     roomTheme: "방 테마",
     themeVibe: "테마 분위기",
@@ -155,9 +157,11 @@ const COPY = {
     outfit: "衣装",
     item: "小物",
     aura: "オーラ",
+    pose: "ポーズ",
     parts: "着せ替え",
     artist: "推し",
     frame: "フレーム",
+    back: "戻る",
     createRoomTitle: "招待リンクを作成",
     roomTheme: "ルームテーマ",
     themeVibe: "テーマの雰囲気",
@@ -259,7 +263,7 @@ const state = {
   mode: "party",
   playerCount: 5,
   phase: "lobby",
-  roomCode: "7294",
+  roomCode: String(Math.floor(1000 + Math.random() * 9000)),
   roundIndex: 0,
   fakeIndex: 0,
   hostIndex: 0,
@@ -277,6 +281,7 @@ const state = {
   hintUsed: false,
   lastSuccess: false,
   selectedAvatar: 0,
+  selectedPose: settings.characterPoses[0].id,
   selectedFrame: frames[0].id,
   selectedBiasStyle: biasStyles[0].id,
   selectedHair: dressUp.hair[0].id,
@@ -294,10 +299,12 @@ const state = {
   playerLangs: [...settings.defaultPlayerLangs],
   currentAnswer: "",
   toast: "",
+  heroTouchedAt: 0,
 };
 
 const app = document.querySelector("#app");
 const languageOptions = settings.languages;
+let heroTimer = null;
 
 function sample(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -437,6 +444,16 @@ function idolStatus(group) {
   return localeData()?.idolGroups?.[group.id]?.status || (group.status === "registered" ? t("registered") : "");
 }
 
+function idolMemberLine(member) {
+  if (typeof member === "string") return member;
+  return [
+    member.name,
+    member.birth,
+    member.nationality,
+    Array.isArray(member.roles) ? member.roles.join("/") : "",
+  ].filter(Boolean).join(" · ");
+}
+
 function localizedNotice(notice) {
   const translated = localeData()?.notices?.[notice.id] || {};
   return { ...notice, ...translated };
@@ -467,6 +484,29 @@ function selectedDressKey(type) {
 
 function profileTabLabel(tab) {
   return t(tab);
+}
+
+function poseLabel(pose) {
+  return localeData()?.characterPoses?.[pose.id] || pose.label || pose.id;
+}
+
+function selectedPoseIndex() {
+  return Math.max(0, settings.characterPoses.findIndex((pose) => pose.id === state.selectedPose));
+}
+
+function characterSetForProfile() {
+  return characterSets.find((set) => set.groupId === state.selectedIdolGroup) || characterSets[0];
+}
+
+function spriteCellMarkup(column, row, extraClass = "") {
+  const set = characterSetForProfile();
+  const safeColumn = Math.max(0, Math.min(column, set.columns - 1));
+  const safeRow = Math.max(0, Math.min(row, set.rows - 1));
+  return `
+    <span class="sprite-avatar ${extraClass}" style="--sprite-columns:${set.columns}; --sprite-rows:${set.rows}; --sprite-col:${safeColumn}; --sprite-row:${safeRow}; --sprite-aspect:${set.aspect || "1 / 1"};">
+      <img src="${set.sheet}" alt="" />
+    </span>
+  `;
 }
 
 function menuItems() {
@@ -522,6 +562,7 @@ function saveSettings() {
     STORAGE_KEY,
     JSON.stringify({
       selectedAvatar: state.selectedAvatar,
+      selectedPose: state.selectedPose,
       selectedBiasStyle: state.selectedBiasStyle,
       selectedHair: state.selectedHair,
       selectedOutfit: state.selectedOutfit,
@@ -543,6 +584,7 @@ function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     if (Number.isInteger(saved.selectedAvatar)) state.selectedAvatar = saved.selectedAvatar;
+    if (settings.characterPoses.some((pose) => pose.id === saved.selectedPose)) state.selectedPose = saved.selectedPose;
     if (biasStyles.some((style) => style.id === saved.selectedBiasStyle)) state.selectedBiasStyle = saved.selectedBiasStyle;
     if (dressOptions("hair").some((item) => item.id === saved.selectedHair)) state.selectedHair = saved.selectedHair;
     if (dressOptions("outfit").some((item) => item.id === saved.selectedOutfit)) state.selectedOutfit = saved.selectedOutfit;
@@ -664,26 +706,11 @@ function profileAvatarMarkup(extraClass = "") {
 }
 
 function fullBodyAvatarMarkup() {
-  const hair = dressOption("hair", state.selectedHair);
-  const outfit = dressOption("outfit", state.selectedOutfit);
-  const item = dressOption("item", state.selectedItem);
-  const aura = dressOption("aura", state.selectedAura);
-  const style = [
-    `--hair:${hair.color || "#6aa7ff"}`,
-    `--outfit:${outfit.color || "#20232b"}`,
-    `--aura:${aura.color || "#ffd166"}`,
-  ].join(";");
-
+  const aura = dressOption("aura", state.selectedAura).color || "#ffd166";
   return `
-    <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="${style}">
+    <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="--aura:${aura};">
       <span class="stage-aura"></span>
-      <div class="character">
-        <span class="char-hair"></span>
-        ${profileAvatarMarkup("char-face")}
-        <span class="char-body"></span>
-        <span class="char-legs"></span>
-        <span class="char-item">${item.symbol || ""}</span>
-      </div>
+      ${spriteCellMarkup(state.selectedAvatar % characterSetForProfile().columns, selectedPoseIndex(), "profile-sprite")}
     </div>
   `;
 }
@@ -885,16 +912,21 @@ function setLanguage(lang) {
 
 function shell(content) {
   const soloClass = state.phase.startsWith("solo") ? " solo-mode" : "";
+  const showRoomCode = !["lobby", "guide", "packs", "news", "settings", "profile"].includes(state.phase);
+  const showBack = state.phase !== "lobby";
   app.innerHTML = `
     <section class="phone${soloClass}">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">${t("eyebrow")}</p>
-          <h1>${t("title")}</h1>
+        <div class="title-stack">
+          ${showBack ? `<button class="back-button" data-action="back">${t("back")}</button>` : ""}
+          <div>
+            <p class="eyebrow">${t("eyebrow")}</p>
+            <h1>${t("title")}</h1>
+          </div>
         </div>
         <div class="top-actions">
           <button class="settings-button" data-action="settings">${t("openSettings")}</button>
-          <div class="room-code">ROOM ${state.roomCode}</div>
+          ${showRoomCode ? `<div class="room-code">ROOM ${state.roomCode}</div>` : ""}
         </div>
       </header>
       ${state.toast ? `<div class="toast">${state.toast}</div>` : ""}
@@ -902,12 +934,41 @@ function shell(content) {
     </section>
   `;
   state.toast = "";
+  setupHeroSlider();
+}
+
+function goBack() {
+  if (state.phase === "partyReady") {
+    state.phase = "roomCreate";
+  } else {
+    state.phase = "lobby";
+    state.mode = "party";
+    window.history.replaceState({}, "", window.location.pathname);
+  }
+  render();
+}
+
+function setupHeroSlider() {
+  clearInterval(heroTimer);
+  const slider = app.querySelector("[data-hero-slider]");
+  if (!slider || slider.children.length < 2) return;
+  slider.addEventListener("pointerdown", () => {
+    state.heroTouchedAt = Date.now();
+  });
+  slider.addEventListener("scroll", () => {
+    state.heroTouchedAt = Date.now();
+  }, { passive: true });
+  heroTimer = setInterval(() => {
+    if (Date.now() - state.heroTouchedAt < 6000) return;
+    const nextIndex = Math.round(slider.scrollLeft / slider.clientWidth + 1) % slider.children.length;
+    slider.scrollTo({ left: nextIndex * slider.clientWidth, behavior: "smooth" });
+  }, 4500);
 }
 
 function lobbyView() {
   shell(`
     <section class="hero-card">
-      <div class="hero-slider" style="--slide-count:${heroSlides.length}">
+      <div class="hero-slider" data-hero-slider style="--slide-count:${heroSlides.length}">
         ${heroSlides.map(localizedHeroSlide).map((slide) => `
           <article class="hero-slide">
             <img class="hero-art" src="${slide.image}" alt="" />
@@ -936,6 +997,7 @@ function lobbyView() {
 function profileView() {
   const group = idolGroup(state.selectedIdolGroup);
   const tab = settings.profileTabs.includes(state.profileTab) ? state.profileTab : settings.profileTabs[0];
+  const avatarIndex = state.selectedAvatar % characterSetForProfile().columns;
   shell(`
     <section class="panel profile-panel">
       <div class="section-head">
@@ -957,9 +1019,17 @@ function profileView() {
       </div>
       ${tab === "parts" ? `
         <div class="avatar-picker">
-          ${avatars.map((avatar, index) => `
-            <button class="${state.selectedAvatar === index ? "selected" : ""}" data-avatar="${index}">
-              ${avatarMarkup(index)}
+          ${Array.from({ length: characterSetForProfile().columns }).map((_, index) => `
+            <button class="${avatarIndex === index ? "selected" : ""}" data-avatar="${index}">
+              ${spriteCellMarkup(index, selectedPoseIndex(), "picker-sprite")}
+            </button>
+          `).join("")}
+        </div>
+        <div class="option-group dress-group">
+          <span>${t("pose")}</span>
+          ${settings.characterPoses.map((pose) => `
+            <button class="${state.selectedPose === pose.id ? "selected" : ""}" data-pose="${pose.id}">
+              ${poseLabel(pose)}<small>${pose.id}</small>
             </button>
           `).join("")}
         </div>
@@ -983,6 +1053,13 @@ function profileView() {
             </button>
           `).join("")}
         </div>
+        ${group.members ? `
+          <div class="member-strip">
+            ${group.members.map((member, index) => `
+              <span>${index + 1}. ${idolMemberLine(member)}</span>
+            `).join("")}
+          </div>
+        ` : ""}
         <div class="option-group">
           <span>최애 포지션 / 推しポジション</span>
           ${biasStyles.map((style) => `
@@ -1578,6 +1655,9 @@ app.addEventListener("click", (event) => {
     state.phase = "settings";
     render();
   }
+  if (button.dataset.action === "back") {
+    goBack();
+  }
   if (button.dataset.action === "room-create") {
     state.roomCode = generateRoomCode();
     state.phase = "roomCreate";
@@ -1608,6 +1688,11 @@ app.addEventListener("click", (event) => {
   if (button.dataset.action === "solo-next") nextSoloRound();
   if (button.dataset.avatar !== undefined) {
     state.selectedAvatar = Number(button.dataset.avatar);
+    saveSettings();
+    render();
+  }
+  if (button.dataset.pose !== undefined && settings.characterPoses.some((pose) => pose.id === button.dataset.pose)) {
+    state.selectedPose = button.dataset.pose;
     saveSettings();
     render();
   }

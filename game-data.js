@@ -8,6 +8,12 @@ window.NEOMANMOLLA_DATA = {
     defaultPlayerLangs: ["ko", "ja", "ko", "ja", "ko", "ja"],
     profileCategories: ["hair", "outfit", "item", "aura"],
     profileTabs: ["parts", "artist", "frame"],
+    characterPoses: [
+      { id: "idle", label: "기본" },
+      { id: "point", label: "삿대질" },
+      { id: "stage", label: "무대" },
+      { id: "think", label: "의심" },
+    ],
     mainMenu: ["solo-start", "room-create", "profile", "guide", "packs", "news"],
     questionThemePacks: ["kpop"],
     audiencePresets: [
@@ -32,6 +38,10 @@ window.NEOMANMOLLA_DATA = {
       title: "최애 밴드 테마로 바로 시작하세요.",
       body: "V01D를 질문 테마로 고르고 팬덤끼리 서로의 답변을 의심해보세요.",
     },
+  ],
+  characterSets: [
+    { id: "band", label: "밴드 캐릭터", sheet: "./assets/ui/v01d-sprite-sheet.png", columns: 5, rows: 4, aspect: "4 / 5" },
+    { id: "v01d", label: "V01D 캐릭터", groupId: "v01d", sheet: "./assets/ui/v01d-official-sprite-sheet.png", columns: 5, rows: 4, aspect: "6 / 5" },
   ],
   playerNames: ["민서", "도윤", "지우", "하준", "서연", "유나"],
   avatars: [
@@ -104,7 +114,13 @@ window.NEOMANMOLLA_DATA = {
       tags: ["공식 등록", "5인조 밴드", "IX Entertainment"],
       owned: true,
       status: "registered",
-      members: ["송유찬", "조주연", "정지섭", "케빈박", "신노스케"],
+      members: [
+        { name: "송유찬", birth: "1995.01.09", nationality: "KR", roles: ["리더", "드럼"] },
+        { name: "조주연", birth: "2000.05.08", nationality: "KR", roles: ["메인보컬"] },
+        { name: "케빈박", birth: "2001.06.21", nationality: "US", roles: ["키보드", "보컬"] },
+        { name: "정지섭", birth: "2001.11.11", nationality: "KR", roles: ["기타", "보컬"] },
+        { name: "신노스케", birth: "2005.10.24", nationality: "JP", roles: ["베이스"] },
+      ],
       debut: "2026-03-11",
       debutAlbum: "01",
     },
@@ -408,6 +424,12 @@ window.NEOMANMOLLA_DATA = {
           title: "推しバンドのテーマですぐ始めよう。",
           body: "V01Dを質問テーマに選んで、ファンダム同士で答えを疑ってみましょう。",
         },
+      },
+      characterPoses: {
+        idle: "基本",
+        point: "指差し",
+        stage: "ステージ",
+        think: "疑い",
       },
       packs: {
         kpop: {

@@ -52,6 +52,24 @@ button {
   padding: 2px 2px 10px;
 }
 
+.title-stack {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.back-button {
+  min-width: 38px;
+  min-height: 30px;
+  border: 1px solid rgba(184, 243, 95, 0.45);
+  border-radius: 999px;
+  color: #101114;
+  background: var(--lime);
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
 .top-actions {
   display: grid;
   justify-items: end;
@@ -156,14 +174,22 @@ p {
 
 .hero-slider {
   display: flex;
-  width: calc(var(--slide-count) * 100%);
-  animation: hero-slide 10s infinite;
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.hero-slider::-webkit-scrollbar {
+  display: none;
 }
 
 .hero-slide {
   position: relative;
-  width: calc(100% / var(--slide-count));
-  flex: 0 0 calc(100% / var(--slide-count));
+  width: 100%;
+  flex: 0 0 100%;
+  scroll-snap-align: start;
 }
 
 .hero-art {
@@ -204,20 +230,6 @@ p {
   color: var(--ink);
   font-size: 0.72rem;
   line-height: 1.25;
-}
-
-@keyframes hero-slide {
-  0%, 42% {
-    transform: translateX(0);
-  }
-
-  50%, 92% {
-    transform: translateX(-50%);
-  }
-
-  100% {
-    transform: translateX(0);
-  }
 }
 
 .hero-copy {
@@ -523,8 +535,8 @@ p {
 
 .stage-avatar {
   position: relative;
-  width: 112px;
-  height: 148px;
+  width: 124px;
+  height: 154px;
   display: grid;
   place-items: end center;
   overflow: hidden;
@@ -533,6 +545,36 @@ p {
   background:
     radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.18), transparent 34%),
     linear-gradient(180deg, rgba(106, 167, 255, 0.18), rgba(8, 9, 12, 0.5));
+}
+
+.sprite-avatar {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 96px;
+  aspect-ratio: var(--sprite-aspect, 1 / 1);
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+.sprite-avatar img {
+  position: absolute;
+  width: calc(var(--sprite-columns) * 100%);
+  height: calc(var(--sprite-rows) * 100%);
+  max-width: none;
+  left: calc(var(--sprite-col) * -100%);
+  top: calc(var(--sprite-row) * -100%);
+  image-rendering: pixelated;
+}
+
+.profile-sprite {
+  width: 132px;
+  margin-bottom: -3px;
+}
+
+.picker-sprite {
+  width: 48px;
+  margin: 0 auto;
 }
 
 .stage-avatar.coral {
@@ -684,14 +726,14 @@ p {
 
 .avatar-picker {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 7px;
 }
 
 .avatar-picker button {
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 6px;
+  padding: 5px 2px;
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -801,6 +843,24 @@ p {
 
 .dress-group button {
   min-height: 40px;
+}
+
+.member-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.member-strip span {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 7px 8px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1.25;
 }
 
 .invite-box {
