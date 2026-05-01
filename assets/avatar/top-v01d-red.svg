@@ -1,15 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 220" shape-rendering="crispEdges">
-  <rect width="160" height="220" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 96" shape-rendering="crispEdges">
+  <rect width="64" height="96" fill="none"/>
+  <g fill="#050608">
+    <rect x="18" y="47" width="28" height="2"/><rect x="16" y="49" width="32" height="28"/><rect x="13" y="51" width="6" height="19"/><rect x="45" y="51" width="6" height="19"/>
+  </g>
   <g fill="#15171c">
-    <rect x="48" y="100" width="64" height="68"/><rect x="36" y="108" width="16" height="44"/><rect x="108" y="108" width="16" height="44"/>
+    <rect x="18" y="49" width="28" height="27"/><rect x="15" y="52" width="4" height="17"/><rect x="45" y="52" width="4" height="17"/>
   </g>
   <g fill="#b51d2a">
-    <rect x="68" y="104" width="24" height="64"/><rect x="40" y="112" width="8" height="20"/><rect x="112" y="112" width="8" height="20"/>
+    <rect x="27" y="50" width="10" height="26"/><rect x="16" y="53" width="3" height="8"/><rect x="45" y="53" width="3" height="8"/>
   </g>
   <g fill="#f7f3ea">
-    <rect x="72" y="112" width="16" height="8"/><rect x="76" y="124" width="8" height="4"/>
+    <rect x="29" y="51" width="6" height="3"/><rect x="30" y="57" width="4" height="2"/>
   </g>
-  <g fill="#050608">
-    <rect x="48" y="96" width="64" height="4"/><rect x="44" y="100" width="4" height="68"/><rect x="112" y="100" width="4" height="68"/>
+  <g fill="#ffd166">
+    <rect x="30" y="63" width="4" height="1"/><rect x="28" y="67" width="8" height="1"/>
   </g>
 </svg>

@@ -684,7 +684,7 @@ p {
 
 .profile-preview {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-columns: 176px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
   padding: 14px;
@@ -721,8 +721,8 @@ p {
 
 .stage-avatar {
   position: relative;
-  width: 140px;
-  height: 186px;
+  width: 176px;
+  height: 218px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -800,18 +800,18 @@ p {
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: 2px;
-  width: 132px;
-  height: 181px;
+  bottom: 6px;
+  width: 162px;
+  height: 243px;
   transform: translateX(-50%);
   overflow: visible;
 }
 
 .asset-shadow {
   position: absolute;
-  left: 28px;
-  bottom: 4px;
-  width: 76px;
+  left: 42px;
+  bottom: 24px;
+  width: 78px;
   height: 13px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.38);
@@ -2245,6 +2245,11 @@ button.answer-card {
 
   .players {
     grid-template-columns: 1fr;
+  }
+
+  .profile-preview {
+    grid-template-columns: 1fr;
+    justify-items: center;
   }
 
   .solo-hud {
