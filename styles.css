@@ -1515,8 +1515,8 @@ p {
 }
 
 .closet-grid b {
-  width: 32px;
-  height: 32px;
+  width: 42px;
+  height: 42px;
   border-radius: 9px;
   display: grid;
   place-items: center;
@@ -1524,6 +1524,15 @@ p {
   background: var(--gold);
   font-size: 0.86rem;
   line-height: 1;
+  overflow: hidden;
+}
+
+.closet-grid b img {
+  width: 58px;
+  height: 76px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform: translateY(2px);
 }
 
 .closet-grid em {

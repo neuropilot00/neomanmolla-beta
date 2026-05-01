@@ -1,4 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 220" shape-rendering="crispEdges">
-  <path d="M44 35h72v48h-9v17H94V86H82v20H68V86H54v14H43V80H34V52h10z" fill="#15171c" stroke="#050608" stroke-width="4"/>
-  <path d="M51 29h18v12H51zm22-8h16v18H73zm22 8h17v13H95zm-50 24h16v12H45zm55-5h19v14h-19z" fill="#2a2d34"/>
+  <rect width="160" height="220" fill="none"/>
+  <g fill="#111318">
+    <rect x="56" y="20" width="48" height="8"/><rect x="48" y="28" width="64" height="8"/><rect x="44" y="36" width="72" height="16"/><rect x="40" y="52" width="80" height="16"/><rect x="44" y="68" width="12" height="28"/><rect x="104" y="68" width="12" height="28"/>
+    <rect x="56" y="60" width="12" height="20"/><rect x="76" y="56" width="8" height="28"/><rect x="92" y="60" width="12" height="20"/>
+  </g>
+  <g fill="#30343d">
+    <rect x="56" y="28" width="16" height="8"/><rect x="84" y="24" width="12" height="12"/><rect x="48" y="52" width="16" height="8"/><rect x="100" y="44" width="12" height="8"/>
+  </g>
 </svg>

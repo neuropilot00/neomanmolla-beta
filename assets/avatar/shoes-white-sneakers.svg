@@ -1,5 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 220" shape-rendering="crispEdges">
-  <path d="M48 198h34v14H48zm30 0h34v14H78z" fill="#f1f4f8" stroke="#343842" stroke-width="4"/>
-  <rect x="57" y="202" width="13" height="3" fill="#ff4d6d"/>
-  <rect x="87" y="202" width="13" height="3" fill="#6aa7ff"/>
+  <rect width="160" height="220" fill="none"/>
+  <g fill="#f1f4f8">
+    <rect x="46" y="198" width="36" height="16"/><rect x="78" y="198" width="36" height="16"/>
+  </g>
+  <g fill="#343842">
+    <rect x="42" y="210" width="40" height="4"/><rect x="78" y="210" width="40" height="4"/>
+  </g>
+  <g fill="#ff4d6d">
+    <rect x="56" y="202" width="12" height="4"/>
+  </g>
+  <g fill="#6aa7ff">
+    <rect x="88" y="202" width="12" height="4"/>
+  </g>
 </svg>

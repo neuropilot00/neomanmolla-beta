@@ -35,6 +35,7 @@ const COPY = {
     appLanguage: "표시 언어",
     playerLanguage: "플레이어 언어",
     save: "저장",
+    saved: "저장됨",
     profileTitle: "내 캐릭터 꾸미기",
     me: "나",
     frameApplied: "프레임 적용 중",
@@ -195,6 +196,7 @@ const COPY = {
     appLanguage: "表示言語",
     playerLanguage: "プレイヤー言語",
     save: "保存",
+    saved: "保存しました",
     profileTitle: "キャラを着せ替え",
     me: "自分",
     frameApplied: "フレーム適用中",
@@ -1259,6 +1261,7 @@ function shell(content) {
   `;
   state.toast = "";
   setupHeroSlider();
+  if (state.phase === "lobby") requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
 }
 
 function goBack() {
@@ -1276,7 +1279,8 @@ function setupHeroSlider() {
   clearInterval(heroTimer);
   const slider = app.querySelector("[data-hero-slider]");
   if (!slider || slider.children.length < 2) return;
-  slider.scrollTo({ left: 0, behavior: "instant" });
+  slider.style.transform = "none";
+  slider.scrollLeft = 0;
   state.heroTouchedAt = Date.now();
   slider.addEventListener("pointerdown", () => {
     state.heroTouchedAt = Date.now();
@@ -1404,7 +1408,7 @@ function profileView() {
           <div class="closet-grid">
           ${dressOptions(activeCategory).map((item) => `
             <button class="${state[selectedDressKey(activeCategory)] === item.id ? "selected" : ""} ${rarityClass(item)}" data-dress-type="${activeCategory}" data-dress-id="${item.id}">
-              <b>${item.asset ? "IMG" : item.symbol || item.label.slice(0, 1)}</b>
+              <b>${item.asset ? `<img src="${item.asset}" alt="" />` : item.symbol || item.label.slice(0, 1)}</b>
               <em>${dressLabel(activeCategory, item.id)}</em>
               <small>${item.rarity || "N"}</small>
             </button>
@@ -1446,7 +1450,7 @@ function profileView() {
           `).join("")}
         </div>
       ` : ""}
-      <button class="primary full" data-action="back-lobby">${t("save")}</button>
+      <button class="primary full" data-action="save-profile">${t("save")}</button>
     </section>
   `);
 }
@@ -2154,6 +2158,11 @@ app.addEventListener("click", async (event) => {
   if (button.dataset.action === "back-lobby") {
     state.phase = "lobby";
     window.history.replaceState({}, "", window.location.pathname);
+    render();
+  }
+  if (button.dataset.action === "save-profile") {
+    saveSettings();
+    state.toast = t("saved");
     render();
   }
   if (button.dataset.action === "quit") {
