@@ -1,5 +1,5 @@
 const gameData = window.NEOMANMOLLA_DATA;
-const { avatars, frames, metrics, packs, playerNames, themes } = gameData;
+const { avatars, biasStyles, dressUp, frames, idolGroups, metrics, packs, playerNames, themes } = gameData;
 const STORAGE_KEY = "neomanmolla-beta-state";
 const EVENTS_KEY = "neomanmolla-beta-events";
 const COPY = {
@@ -13,10 +13,16 @@ const COPY = {
     createRoom: "방 만들기",
     profile: "내 프로필",
     language: "언어",
+    appLanguage: "표시 언어",
+    playerLanguage: "플레이어 언어",
     save: "저장",
     profileTitle: "보여야 팔립니다",
     me: "나",
     frameApplied: "프레임 적용 중",
+    hair: "헤어",
+    outfit: "의상",
+    item: "소품",
+    aura: "오라",
     createRoomTitle: "테스트 링크 만들기",
     roomTheme: "방 테마",
     questionPack: "질문팩",
@@ -129,10 +135,16 @@ const COPY = {
     createRoom: "ルーム作成",
     profile: "プロフィール",
     language: "言語",
+    appLanguage: "表示言語",
+    playerLanguage: "プレイヤー言語",
     save: "保存",
     profileTitle: "見せたくなる見た目に",
     me: "自分",
     frameApplied: "フレーム適用中",
+    hair: "ヘア",
+    outfit: "衣装",
+    item: "小物",
+    aura: "オーラ",
     createRoomTitle: "テストリンクを作成",
     roomTheme: "ルームテーマ",
     questionPack: "質問パック",
@@ -258,10 +270,17 @@ const state = {
   lastSuccess: false,
   selectedAvatar: 0,
   selectedFrame: frames[0].id,
+  selectedBiasStyle: biasStyles[0].id,
+  selectedHair: dressUp.hair[0].id,
+  selectedOutfit: dressUp.outfit[0].id,
+  selectedItem: dressUp.item[0].id,
+  selectedAura: dressUp.aura[0].id,
+  selectedIdolGroup: idolGroups[0].id,
   selectedTheme: themes[0],
   selectedPack: packs[0].name,
   lang: "ko",
   customNames: [...playerNames],
+  playerLangs: ["ko", "ja", "ko", "ja", "ko", "ja"],
   currentAnswer: "",
   launchChecklist: {
     rule: false,
@@ -273,6 +292,10 @@ const state = {
 };
 
 const app = document.querySelector("#app");
+const languageOptions = [
+  { id: "ko", label: "한국어" },
+  { id: "ja", label: "日本語" },
+];
 
 function sample(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -286,8 +309,20 @@ function t(key) {
   return COPY[state.lang]?.[key] || COPY.ko[key] || key;
 }
 
+function supportedLang(lang) {
+  return languageOptions.some((option) => option.id === lang);
+}
+
+function tt(lang, key) {
+  return COPY[lang]?.[key] || COPY.ko[key] || key;
+}
+
 function localeData() {
   return gameData.locales?.[state.lang] || null;
+}
+
+function localeDataFor(lang) {
+  return gameData.locales?.[lang] || null;
 }
 
 function playerNameList() {
@@ -307,6 +342,11 @@ function localizedPack(pack) {
   return translated ? { ...pack, ...translated, id: packId(pack), baseName: pack.name } : { ...pack, baseName: pack.name };
 }
 
+function localizedPackFor(lang, pack) {
+  const translated = localeDataFor(lang)?.packs?.[packId(pack)];
+  return translated ? { ...pack, ...translated, id: packId(pack), baseName: pack.name } : { ...pack, baseName: pack.name };
+}
+
 function localizedPacks() {
   return packs.map(localizedPack);
 }
@@ -323,6 +363,70 @@ function frameLabel(frame) {
   return localeData()?.frames?.[frame] || frames.find((item) => item.id === frame)?.label || "기본";
 }
 
+function biasStyleLabel(id) {
+  const style = biasStyles.find((item) => item.id === id) || biasStyles[0];
+  return localeData()?.biasStyles?.[id]?.label || style.label;
+}
+
+function biasStyleDetail(id) {
+  const style = biasStyles.find((item) => item.id === id) || biasStyles[0];
+  return localeData()?.biasStyles?.[id]?.detail || style.detail;
+}
+
+function idolGroup(id) {
+  return idolGroups.find((group) => group.id === id) || idolGroups[0];
+}
+
+function idolTags(group) {
+  return localeData()?.idolGroups?.[group.id]?.tags || group.tags;
+}
+
+function dressOptions(type) {
+  return dressUp[type] || [];
+}
+
+function dressOption(type, id) {
+  const options = dressOptions(type);
+  return options.find((item) => item.id === id) || options[0] || {};
+}
+
+function dressLabel(type, id) {
+  const option = dressOption(type, id);
+  return localeData()?.dressUp?.[type]?.[id] || option.label || id;
+}
+
+function languageSelectMarkup(selected, datasetName, label = t("language")) {
+  const options = languageOptions.map((option) => `
+    <option value="${option.id}" ${selected === option.id ? "selected" : ""}>${option.label}</option>
+  `).join("");
+  return `
+    <div class="language-select">
+      <span>${label}</span>
+      <select ${datasetName}>
+        ${options}
+      </select>
+    </div>
+  `;
+}
+
+function roundForLang(lang) {
+  const pack = localizedPackFor(lang, selectedBasePack());
+  return pack.rounds[state.roundIndex % pack.rounds.length];
+}
+
+function playerLang(index) {
+  return supportedLang(state.playerLangs[index]) ? state.playerLangs[index] : state.lang;
+}
+
+function questionForPlayer(index, fake = index === state.fakeIndex) {
+  const round = roundForLang(playerLang(index));
+  return fake ? round.fake : round.innocent;
+}
+
+function roleForPlayer(index, fake = index === state.fakeIndex) {
+  return fake ? tt(playerLang(index), "fakeQuestion") : tt(playerLang(index), "commonQuestion");
+}
+
 function generateRoomCode() {
   return String(Math.floor(1000 + Math.random() * 9000));
 }
@@ -332,10 +436,17 @@ function saveSettings() {
     STORAGE_KEY,
     JSON.stringify({
       selectedAvatar: state.selectedAvatar,
+      selectedBiasStyle: state.selectedBiasStyle,
+      selectedHair: state.selectedHair,
+      selectedOutfit: state.selectedOutfit,
+      selectedItem: state.selectedItem,
+      selectedAura: state.selectedAura,
       selectedFrame: state.selectedFrame,
+      selectedIdolGroup: state.selectedIdolGroup,
       selectedPack: state.selectedPack,
       selectedTheme: state.selectedTheme,
       customNames: state.customNames,
+      playerLangs: state.playerLangs,
       lang: state.lang,
     }),
   );
@@ -345,12 +456,19 @@ function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     if (Number.isInteger(saved.selectedAvatar)) state.selectedAvatar = saved.selectedAvatar;
+    if (biasStyles.some((style) => style.id === saved.selectedBiasStyle)) state.selectedBiasStyle = saved.selectedBiasStyle;
+    if (dressOptions("hair").some((item) => item.id === saved.selectedHair)) state.selectedHair = saved.selectedHair;
+    if (dressOptions("outfit").some((item) => item.id === saved.selectedOutfit)) state.selectedOutfit = saved.selectedOutfit;
+    if (dressOptions("item").some((item) => item.id === saved.selectedItem)) state.selectedItem = saved.selectedItem;
+    if (dressOptions("aura").some((item) => item.id === saved.selectedAura)) state.selectedAura = saved.selectedAura;
     if (frames.some((frame) => frame.id === saved.selectedFrame)) state.selectedFrame = saved.selectedFrame;
+    if (idolGroups.some((group) => group.id === saved.selectedIdolGroup)) state.selectedIdolGroup = saved.selectedIdolGroup;
     if (packs.some((pack) => pack.name === saved.selectedPack || packId(pack) === saved.selectedPack)) state.selectedPack = saved.selectedPack;
     if (themes.includes(saved.selectedTheme)) state.selectedTheme = saved.selectedTheme;
-    if (["ko", "ja"].includes(saved.lang)) state.lang = saved.lang;
+    if (supportedLang(saved.lang)) state.lang = saved.lang;
     if (Array.isArray(saved.customNames)) state.customNames = playerNameList().map((name, index) => cleanText(saved.customNames[index], name));
     else state.customNames = [...playerNameList()];
+    if (Array.isArray(saved.playerLangs)) state.playerLangs = playerNames.map((_, index) => supportedLang(saved.playerLangs[index]) ? saved.playerLangs[index] : state.playerLangs[index]);
   } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
@@ -366,13 +484,20 @@ function applyUrlRoom() {
   state.selectedTheme = params.get("theme") || state.selectedTheme;
   state.playerCount = Number(params.get("players")) || 4;
   const urlLang = params.get("lang");
-  if (["ko", "ja"].includes(urlLang) && state.lang !== urlLang) {
+  if (supportedLang(urlLang) && state.lang !== urlLang) {
     const previousNames = playerNameList();
     state.lang = urlLang;
     const nextNames = playerNameList();
     state.customNames = state.customNames.map((name, index) => {
       if (!name || name === previousNames[index]) return nextNames[index] || name;
       return name;
+    });
+  }
+  const urlPlayerLangs = params.get("pl");
+  if (urlPlayerLangs) {
+    state.playerLangs = playerNames.map((_, index) => {
+      const code = urlPlayerLangs.slice(index * 2, index * 2 + 2);
+      return supportedLang(code) ? code : state.playerLangs[index];
     });
   }
   state.phase = "joinRoom";
@@ -397,18 +522,18 @@ function roomInviteUrl() {
   url.searchParams.set("theme", state.selectedTheme);
   url.searchParams.set("players", String(state.playerCount));
   url.searchParams.set("lang", state.lang);
+  url.searchParams.set("pl", state.playerLangs.slice(0, state.playerCount).join(""));
   return url.toString();
 }
 
 function resultText() {
   const fake = state.answers[state.fakeIndex];
   const verdict = state.lastSuccess ? t("resultHit") : t("resultMiss");
-  const round = currentRound();
   return [
     `${t("title")} ${t("roomResult")}: ${verdict}`,
     `${t("fakeIs")} ${fake.player}`,
-    `${t("commonQuestion")}: ${round.innocent}`,
-    `${t("fakeQuestion")}: ${round.fake}`,
+    `${t("commonQuestion")}: ${questionForPlayer(0, false)} / ${questionForPlayer(1, false)}`,
+    `${t("fakeQuestion")}: ${questionForPlayer(0, true)} / ${questionForPlayer(1, true)}`,
     `${selectedPack().name} ${t("packSuffix")}`,
     roomInviteUrl(),
   ].join("\n");
@@ -461,6 +586,31 @@ function profileAvatarMarkup(extraClass = "") {
   return avatarMarkup(state.selectedAvatar, extraClass);
 }
 
+function fullBodyAvatarMarkup() {
+  const hair = dressOption("hair", state.selectedHair);
+  const outfit = dressOption("outfit", state.selectedOutfit);
+  const item = dressOption("item", state.selectedItem);
+  const aura = dressOption("aura", state.selectedAura);
+  const style = [
+    `--hair:${hair.color || "#6aa7ff"}`,
+    `--outfit:${outfit.color || "#20232b"}`,
+    `--aura:${aura.color || "#ffd166"}`,
+  ].join(";");
+
+  return `
+    <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="${style}">
+      <span class="stage-aura"></span>
+      <div class="character">
+        <span class="char-hair"></span>
+        ${profileAvatarMarkup("char-face")}
+        <span class="char-body"></span>
+        <span class="char-legs"></span>
+        <span class="char-item">${item.symbol || ""}</span>
+      </div>
+    </div>
+  `;
+}
+
 function selectedPack() {
   return localizedPack(selectedBasePack());
 }
@@ -485,8 +635,8 @@ function startGame() {
   state.answers = players().map((player) => ({
     player: player.name,
     text: "",
-    question: player.fake ? currentRound().fake : currentRound().innocent,
-    role: player.fake ? t("fakeQuestion") : t("commonQuestion"),
+    question: questionForPlayer(player.index, player.fake),
+    role: roleForPlayer(player.index, player.fake),
     suspicious: player.fake,
   }));
   state.votes = Array(state.playerCount).fill(null);
@@ -574,7 +724,7 @@ function submitAnswer() {
 }
 
 function quickAnswer() {
-  const round = currentRound();
+  const round = roundForLang(playerLang(state.hostIndex));
   const pool = state.hostIndex === state.fakeIndex ? round.fakeAnswers || round.answers : round.botAnswers || round.answers;
   state.currentAnswer = sample(pool);
   submitAnswer();
@@ -644,7 +794,7 @@ function setPlayerCount(count) {
 }
 
 function setLanguage(lang) {
-  if (!["ko", "ja"].includes(lang) || state.lang === lang) return;
+  if (!supportedLang(lang) || state.lang === lang) return;
   const previousNames = playerNameList();
   state.lang = lang;
   const nextNames = playerNameList();
@@ -679,10 +829,7 @@ function lobbyView() {
     <section class="hero-card">
       <img class="hero-art" src="./assets/ui/hero-accuse-pixel-900.png" alt="" />
       <div class="hero-copy">
-        <div class="language-row" aria-label="${t("language")}">
-          <button class="${state.lang === "ko" ? "selected" : ""}" data-lang="ko">한국어</button>
-          <button class="${state.lang === "ja" ? "selected" : ""}" data-lang="ja">日本語</button>
-        </div>
+        ${languageSelectMarkup(state.lang, "data-app-lang", t("appLanguage"))}
         <div class="tag">${t("heroTag")}</div>
         <h2>${t("heroTitle")}</h2>
         <p>${t("heroBody")}</p>
@@ -700,6 +847,7 @@ function lobbyView() {
 }
 
 function profileView() {
+  const group = idolGroup(state.selectedIdolGroup);
   shell(`
     <section class="panel profile-panel">
       <div class="section-head">
@@ -707,10 +855,11 @@ function profileView() {
         <strong>${t("profileTitle")}</strong>
       </div>
       <div class="profile-preview ${state.selectedFrame}">
-        ${profileAvatarMarkup("profile-avatar")}
+        ${fullBodyAvatarMarkup()}
         <div>
           <strong>${t("me")}</strong>
-          <p>${frameLabel(state.selectedFrame)} ${t("frameApplied")}</p>
+          <p>${group.name} · ${biasStyleLabel(state.selectedBiasStyle)}</p>
+          <small>${dressLabel("hair", state.selectedHair)} / ${dressLabel("outfit", state.selectedOutfit)} / ${dressLabel("item", state.selectedItem)} / ${frameLabel(state.selectedFrame)} ${t("frameApplied")}</small>
         </div>
       </div>
       <div class="avatar-picker">
@@ -724,6 +873,32 @@ function profileView() {
         ${frames.map((frame) => `
           <button class="${state.selectedFrame === frame.id ? "selected" : ""}" data-frame="${frame.id}">
             <span class="frame-dot ${frame.id}"></span>${frameLabel(frame.id)}
+          </button>
+        `).join("")}
+      </div>
+      ${["hair", "outfit", "item", "aura"].map((type) => `
+        <div class="option-group dress-group">
+          <span>${t(type)}</span>
+          ${dressOptions(type).map((item) => `
+            <button class="${state[`selected${type[0].toUpperCase()}${type.slice(1)}`] === item.id ? "selected" : ""}" data-dress-type="${type}" data-dress-id="${item.id}">
+              ${dressLabel(type, item.id)}<small>${item.symbol || ""}</small>
+            </button>
+          `).join("")}
+        </div>
+      `).join("")}
+      <div class="option-group">
+        <span>최애 그룹 / 推しグループ</span>
+        ${idolGroups.map((item) => `
+          <button class="${state.selectedIdolGroup === item.id ? "selected" : ""}" data-idol-group="${item.id}">
+            ${item.name}<small>${item.type === "boy" ? "BOY" : "GIRL"} · ${idolTags(item).join(" · ")}</small>
+          </button>
+        `).join("")}
+      </div>
+      <div class="option-group">
+        <span>최애 포지션 / 推しポジション</span>
+        ${biasStyles.map((style) => `
+          <button class="${state.selectedBiasStyle === style.id ? "selected" : ""}" data-bias-style="${style.id}">
+            ${biasStyleLabel(style.id)}<small>${biasStyleDetail(style.id)}</small>
           </button>
         `).join("")}
       </div>
@@ -901,6 +1076,7 @@ function partyReadyView() {
           <label>
             <span>${player.index + 1}P</span>
             <input data-name-index="${player.index}" value="${player.name}" maxlength="8" />
+            ${languageSelectMarkup(playerLang(player.index), `data-player-lang-index="${player.index}"`, t("playerLanguage"))}
           </label>
         `).join("")}
       </div>
@@ -992,18 +1168,18 @@ function soloGameOverView() {
 }
 
 function roleView() {
-  const round = currentRound();
   const player = players()[state.hostIndex];
-  const question = player.fake ? round.fake : round.innocent;
+  const lang = playerLang(state.hostIndex);
+  const answer = state.answers[state.hostIndex];
   shell(`
     ${quitBar()}
     <section class="panel role-card ${player.fake ? "fake" : ""}">
-      <div class="turn-line">${player.name}${t("hostTurn")}</div>
+      <div class="turn-line">${player.name}${tt(lang, "hostTurn")} · ${lang.toUpperCase()}</div>
       ${avatarMarkup(player.index, "big")}
-      <h2>${player.fake ? t("yourDifferentQuestion") : t("commonQuestion")}</h2>
-      <p class="question">${question}</p>
+      <h2>${player.fake ? tt(lang, "yourDifferentQuestion") : tt(lang, "commonQuestion")}</h2>
+      <p class="question">${answer.question}</p>
       <button class="primary full" data-action="next-role">
-        ${state.hostIndex === state.playerCount - 1 ? t("answerGo") : t("passPhone")}
+        ${state.hostIndex === state.playerCount - 1 ? tt(lang, "answerGo") : tt(lang, "passPhone")}
       </button>
     </section>
     ${playerList(true)}
@@ -1025,19 +1201,20 @@ function answerView() {
 
 function answerInputView() {
   const answer = state.answers[state.hostIndex];
+  const lang = playerLang(state.hostIndex);
   shell(`
     ${quitBar()}
     <section class="panel answer-input-panel">
-      <div class="turn-line">${answer.player}${t("answerTurn")}</div>
+      <div class="turn-line">${answer.player}${tt(lang, "answerTurn")} · ${lang.toUpperCase()}</div>
       ${avatarMarkup(state.hostIndex, "big")}
       <h2>${answer.role}</h2>
       <p class="question">${answer.question}</p>
       <label class="answer-field">
-        <span>${t("answerShort")}</span>
-        <input data-answer-input="true" value="${state.currentAnswer}" maxlength="18" placeholder="${t("answerPlaceholder")}" autofocus />
+        <span>${tt(lang, "answerShort")}</span>
+        <input data-answer-input="true" value="${state.currentAnswer}" maxlength="18" placeholder="${tt(lang, "answerPlaceholder")}" autofocus />
       </label>
-      <button class="primary full" data-action="submit-answer">${state.hostIndex === state.playerCount - 1 ? t("submitDone") : t("nextPerson")}</button>
-      <button class="secondary full" data-action="quick-answer">${t("quickAnswer")}</button>
+      <button class="primary full" data-action="submit-answer">${state.hostIndex === state.playerCount - 1 ? tt(lang, "submitDone") : tt(lang, "nextPerson")}</button>
+      <button class="secondary full" data-action="quick-answer">${tt(lang, "quickAnswer")}</button>
     </section>
     ${playerList(true)}
   `);
@@ -1127,7 +1304,6 @@ function resultShareCard(fake) {
 }
 
 function partyResultCard(fake) {
-  const round = currentRound();
   return `
     <section class="share-card">
       <span>${t("roomResult")}</span>
@@ -1137,12 +1313,14 @@ function partyResultCard(fake) {
     </section>
     <section class="question-reveal">
       <article>
-        <span>${t("commonQuestion")}</span>
-        <strong>${round.innocent}</strong>
+        <span>${COPY.ko.commonQuestion} / ${COPY.ja.commonQuestion}</span>
+        <strong>${questionForPlayer(0, false)}</strong>
+        <small>${questionForPlayer(1, false)}</small>
       </article>
       <article class="fake-question">
-        <span>${t("fakeQuestion")}</span>
-        <strong>${round.fake}</strong>
+        <span>${COPY.ko.fakeQuestion} / ${COPY.ja.fakeQuestion}</span>
+        <strong>${questionForPlayer(0, true)}</strong>
+        <small>${questionForPlayer(1, true)}</small>
       </article>
     </section>
   `;
@@ -1252,6 +1430,14 @@ app.addEventListener("click", (event) => {
 
   if (button.dataset.count) setPlayerCount(Number(button.dataset.count));
   if (button.dataset.lang) setLanguage(button.dataset.lang);
+  if (button.dataset.playerLang) {
+    const [index, lang] = button.dataset.playerLang.split(":");
+    if (supportedLang(lang)) {
+      state.playerLangs[Number(index)] = lang;
+      saveSettings();
+      render();
+    }
+  }
   if (button.dataset.check) {
     state.launchChecklist[button.dataset.check] = !state.launchChecklist[button.dataset.check];
     render();
@@ -1315,6 +1501,24 @@ app.addEventListener("click", (event) => {
     saveSettings();
     render();
   }
+  if (button.dataset.biasStyle !== undefined) {
+    state.selectedBiasStyle = button.dataset.biasStyle;
+    saveSettings();
+    render();
+  }
+  if (button.dataset.idolGroup !== undefined) {
+    state.selectedIdolGroup = button.dataset.idolGroup;
+    saveSettings();
+    render();
+  }
+  if (button.dataset.dressType !== undefined && button.dataset.dressId !== undefined) {
+    const stateKey = `selected${button.dataset.dressType[0].toUpperCase()}${button.dataset.dressType.slice(1)}`;
+    if (dressOptions(button.dataset.dressType).some((item) => item.id === button.dataset.dressId)) {
+      state[stateKey] = button.dataset.dressId;
+      saveSettings();
+      render();
+    }
+  }
   if (button.dataset.theme !== undefined) {
     state.selectedTheme = button.dataset.theme;
     saveSettings();
@@ -1337,6 +1541,18 @@ app.addEventListener("input", (event) => {
   }
   if (input.dataset.answerInput) {
     state.currentAnswer = input.value;
+  }
+});
+
+app.addEventListener("change", (event) => {
+  const input = event.target;
+  if (input.dataset.appLang !== undefined && supportedLang(input.value)) {
+    setLanguage(input.value);
+  }
+  if (input.dataset.playerLangIndex !== undefined && supportedLang(input.value)) {
+    state.playerLangs[Number(input.dataset.playerLangIndex)] = input.value;
+    saveSettings();
+    render();
   }
 });
 

@@ -13,6 +13,10 @@ Purpose: 실제 테스트 유저에게 링크를 보내 검증할 수 있는 모
 - Party input: each local player can enter a real answer after viewing their private question.
 - Data-driven content: questions, packs, avatars, frames, themes, and metrics live in `game-data.js`.
 - Localization: Korean and Japanese UI copy, question packs, pack metadata, metrics, themes, and player defaults.
+- Mixed-language rooms: each player can select KO or JA and receives the same round in their own language.
+- K-pop internal data: 5 boy groups and 5 girl groups are included for private testing only.
+- Avatar monetization test: full-body character dressing supports hair, outfit, item, aura, idol group, bias style, and frame.
+- Language UI is select-based so English can be added without redesigning the lobby or ready room.
 - Product surfaces: room creation, profile setup, question packs, result card, beta feedback screen.
 - Room links: static URL query parameters carry room code, pack, theme, and player count for tester onboarding.
 - Language links: `lang=ko` and `lang=ja` are preserved in invite links.
@@ -28,7 +32,7 @@ Primary:
 
 Secondary:
 
-- Profile frames, avatars, and room themes.
+- Full-body avatar parts, profile frames, idol-inspired style presets, and room themes.
 
 ## Beta Test Questions
 
@@ -46,6 +50,7 @@ Secondary:
 - No server-side analytics yet. Current counters are local-only.
 - No payment, account, or database integration.
 - User-entered text is stripped of angle brackets before rendering to reduce static-demo injection risk.
+- K-pop group names are internal-test placeholders until rights, naming, and update policy are approved.
 
 ## Deployment Notes
 

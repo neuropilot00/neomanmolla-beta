@@ -187,6 +187,30 @@ p {
   background: var(--lime);
 }
 
+.language-select {
+  display: grid;
+  gap: 5px;
+}
+
+.language-select span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 950;
+}
+
+.language-select select {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid rgba(184, 243, 95, 0.34);
+  border-radius: 10px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.07);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
 .hero-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -344,7 +368,7 @@ p {
 
 .profile-preview {
   display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
+  grid-template-columns: 124px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
   padding: 14px;
@@ -358,9 +382,186 @@ p {
   border-color: rgba(255, 209, 102, 0.5);
 }
 
-.profile-avatar {
-  width: 66px;
-  height: 66px;
+.profile-preview.stage {
+  border-color: rgba(106, 167, 255, 0.56);
+}
+
+.profile-preview.holo {
+  border-color: rgba(77, 224, 189, 0.56);
+}
+
+.profile-preview.heart {
+  border-color: rgba(255, 77, 109, 0.58);
+}
+
+.profile-preview small {
+  display: block;
+  margin-top: 5px;
+  color: var(--gold);
+  font-size: 0.74rem;
+  line-height: 1.25;
+  font-weight: 850;
+}
+
+.stage-avatar {
+  position: relative;
+  width: 112px;
+  height: 148px;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(106, 167, 255, 0.18), rgba(8, 9, 12, 0.5));
+}
+
+.stage-avatar.coral {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 77, 109, 0.22), transparent 34%),
+    linear-gradient(180deg, rgba(255, 77, 109, 0.16), rgba(8, 9, 12, 0.5));
+}
+
+.stage-avatar.gold {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 209, 102, 0.26), transparent 34%),
+    linear-gradient(180deg, rgba(255, 209, 102, 0.16), rgba(8, 9, 12, 0.5));
+}
+
+.stage-avatar.holo {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(77, 224, 189, 0.24), transparent 34%),
+    linear-gradient(180deg, rgba(106, 167, 255, 0.16), rgba(77, 224, 189, 0.1));
+}
+
+.stage-avatar.heart {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 77, 109, 0.28), transparent 34%),
+    linear-gradient(180deg, rgba(255, 143, 179, 0.18), rgba(8, 9, 12, 0.52));
+}
+
+.stage-aura {
+  position: absolute;
+  inset: 14px 18px 34px;
+  border-radius: 50%;
+  border: 2px solid var(--aura);
+  opacity: 0.44;
+  filter: drop-shadow(0 0 10px var(--aura));
+}
+
+.character {
+  position: relative;
+  width: 76px;
+  height: 122px;
+}
+
+.char-face {
+  position: absolute;
+  top: 29px;
+  left: 18px;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border-width: 2px;
+  box-shadow: 0 7px 0 rgba(0, 0, 0, 0.28);
+}
+
+.char-hair {
+  position: absolute;
+  top: 19px;
+  left: 13px;
+  z-index: 4;
+  width: 50px;
+  height: 34px;
+  border-radius: 22px 22px 10px 10px;
+  background: var(--hair);
+  box-shadow: inset -8px -6px rgba(0, 0, 0, 0.18);
+}
+
+.char-hair::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 8px;
+  bottom: -6px;
+  height: 12px;
+  border-radius: 0 0 12px 12px;
+  background: var(--hair);
+}
+
+.char-body {
+  position: absolute;
+  top: 67px;
+  left: 14px;
+  z-index: 2;
+  width: 48px;
+  height: 38px;
+  border-radius: 13px 13px 8px 8px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.24) 0 12%, transparent 12% 88%, rgba(0, 0, 0, 0.18) 88%),
+    var(--outfit);
+}
+
+.char-body::before,
+.char-body::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  width: 16px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--outfit);
+}
+
+.char-body::before {
+  left: -13px;
+  transform: rotate(16deg);
+}
+
+.char-body::after {
+  right: -13px;
+  transform: rotate(-16deg);
+}
+
+.char-legs {
+  position: absolute;
+  top: 101px;
+  left: 22px;
+  width: 12px;
+  height: 22px;
+  border-radius: 0 0 8px 8px;
+  background: #20232b;
+  box-shadow: 20px 0 0 #20232b;
+}
+
+.char-item {
+  position: absolute;
+  right: 1px;
+  top: 71px;
+  z-index: 5;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #101114;
+  background: var(--aura);
+  font-size: 0.95rem;
+  font-weight: 950;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.stage-avatar.main-dancer .char-body {
+  transform: skewX(-7deg);
+}
+
+.stage-avatar.center .stage-aura {
+  border-radius: 18px;
+}
+
+.stage-avatar.rapper .char-hair {
+  border-radius: 8px 8px 16px 16px;
 }
 
 .avatar-picker {
@@ -420,6 +621,18 @@ p {
   background: var(--gold);
 }
 
+.frame-dot.stage {
+  background: var(--blue);
+}
+
+.frame-dot.holo {
+  background: var(--mint);
+}
+
+.frame-dot.heart {
+  background: var(--hot);
+}
+
 .room-preview {
   padding: 16px;
 }
@@ -448,12 +661,28 @@ p {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   text-align: left;
 }
 
 .option-group small {
   color: var(--gold);
   font-size: 0.72rem;
+  line-height: 1.2;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.dress-group {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dress-group > span {
+  grid-column: 1 / -1;
+}
+
+.dress-group button {
+  min-height: 40px;
 }
 
 .invite-box {
@@ -507,6 +736,28 @@ p {
   background: rgba(255, 255, 255, 0.06);
   font: inherit;
   font-weight: 900;
+}
+
+.player-lang-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.player-lang-row button {
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.player-lang-row button.selected {
+  color: #111;
+  border-color: rgba(184, 243, 95, 0.62);
+  background: var(--lime);
 }
 
 .count-row button,
@@ -873,6 +1124,14 @@ button.answer-card {
   display: block;
   margin-top: 3px;
   line-height: 1.24;
+}
+
+.question-reveal small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.25;
+  font-weight: 800;
 }
 
 .question-reveal .fake-question {
