@@ -12,11 +12,20 @@ const COPY = {
     heroBody: "한 명만 다른 질문을 받습니다. 자연스러운 척하는 답변을 찾아내세요.",
     soloPlay: "혼자 플레이",
     quickMatch: "빠른 참가",
+    quickMatchBody: "대기 중인 공개방에 바로 들어갑니다.",
     createRoom: "방 만들기",
+    createRoomBody: "친구에게 보낼 초대방을 만듭니다.",
     profile: "내 프로필",
+    customizeBody: "캐릭터와 최애 설정을 정리합니다.",
     guide: "게임 방법",
     packs: "질문팩",
     news: "공지",
+    homeLive: "운영 베타",
+    homeLiveBody: "Railway + Postgres 연결됨",
+    featuredPacks: "추천 질문팩",
+    featuredPacksBody: "지금 테스트하기 좋은 테마",
+    homeUtilities: "내 공간",
+    soloShort: "혼자 연습",
     artistRegistry: "아티스트 등록 현황",
     registered: "등록됨",
     ownedArtist: "공식 아티스트",
@@ -162,11 +171,20 @@ const COPY = {
     heroBody: "一人だけ違う質問を受けます。自然なふりをする答えを見抜いてください。",
     soloPlay: "一人で遊ぶ",
     quickMatch: "クイック参加",
+    quickMatchBody: "待機中の公開ルームにすぐ入ります。",
     createRoom: "ルーム作成",
+    createRoomBody: "友だちに送る招待ルームを作ります。",
     profile: "プロフィール",
+    customizeBody: "キャラと推し設定を整えます。",
     guide: "遊び方",
     packs: "質問パック",
     news: "お知らせ",
+    homeLive: "運営ベータ",
+    homeLiveBody: "Railway + Postgres 接続済み",
+    featuredPacks: "おすすめ質問パック",
+    featuredPacksBody: "今テストしやすいテーマ",
+    homeUtilities: "マイスペース",
+    soloShort: "一人で練習",
     artistRegistry: "アーティスト登録状況",
     registered: "登録済み",
     ownedArtist: "公式アーティスト",
@@ -1292,30 +1310,69 @@ function setupHeroSlider() {
 }
 
 function lobbyView() {
+  const featured = localizedPacks().filter((pack) => ["kpop", "creator", "game", "campus"].includes(pack.id || pack.name)).slice(0, 4);
   shell(`
-    <section class="hero-card">
-      <div class="hero-slider" data-hero-slider style="--slide-count:${heroSlides.length}">
-        ${heroSlides.map(localizedHeroSlide).map((slide) => `
-          <article class="hero-slide">
-            <img class="hero-art" src="${slide.image}" alt="" />
-            <div class="hero-slide-copy">
-              <span>${slide.tag}</span>
-              <strong>${slide.title}</strong>
-              <p>${slide.body}</p>
-            </div>
-          </article>
-        `).join("")}
-      </div>
-      <div class="hero-copy">
-        <div class="tag">${localizedHeroSlide(heroSlides[0]).tag}</div>
-        <h2>${t("heroTitle")}</h2>
-        <p>${t("heroBody")}</p>
-        <div class="main-menu">
-          ${menuItems().map((item) => `
-            <button class="${item.className}" data-action="${item.action}">${item.label}</button>
+    <section class="home-screen">
+      <section class="hero-card home-hero">
+        <div class="hero-slider" data-hero-slider style="--slide-count:${heroSlides.length}">
+          ${heroSlides.map(localizedHeroSlide).map((slide) => `
+            <article class="hero-slide">
+              <img class="hero-art" src="${slide.image}" alt="" />
+              <div class="hero-slide-copy">
+                <span>${slide.tag}</span>
+                <strong>${slide.title}</strong>
+                <p>${slide.body}</p>
+              </div>
+            </article>
           `).join("")}
         </div>
-      </div>
+        <div class="home-hero-meta">
+          <span>${t("homeLive")}</span>
+          <strong>${t("title")}</strong>
+          <small>${t("homeLiveBody")}</small>
+        </div>
+      </section>
+      <section class="home-primary-actions">
+        <button class="home-action home-action-main" data-action="quick-match">
+          <span>${t("quickMatch")}</span>
+          <strong>${t("quickMatchBody")}</strong>
+        </button>
+        <button class="home-action" data-action="room-create">
+          <span>${t("createRoom")}</span>
+          <strong>${t("createRoomBody")}</strong>
+        </button>
+        <button class="home-action" data-action="solo-start">
+          <span>${t("soloShort")}</span>
+          <strong>${t("soloBody")}</strong>
+        </button>
+      </section>
+      <section class="home-tools">
+        <div class="section-head">
+          <span>${t("homeUtilities")}</span>
+          <strong>${t("homeLive")}</strong>
+        </div>
+        <div class="home-tool-row">
+          <button data-action="profile">${t("profile")}</button>
+          <button data-action="packs">${t("packs")}</button>
+          <button data-action="guide">${t("guide")}</button>
+          <button data-action="news">${t("news")}</button>
+        </div>
+      </section>
+      <section class="home-featured">
+        <div class="section-head">
+          <span>${t("featuredPacks")}</span>
+          <strong>${t("featuredPacksBody")}</strong>
+        </div>
+        <div class="home-pack-row">
+          ${featured.map((pack) => `
+            <button data-pack="${pack.id}" data-action="room-create">
+              <span>${pack.status}</span>
+              <strong>${pack.name}</strong>
+              <small>${pack.tone}</small>
+            </button>
+          `).join("")}
+        </div>
+      </section>
     </section>
   `);
 }
