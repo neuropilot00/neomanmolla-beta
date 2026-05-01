@@ -172,7 +172,9 @@ p {
 }
 
 .mvp-grid,
-.metric-row {
+.metric-row,
+.rule-steps,
+.launch-grid {
   display: grid;
   gap: 8px;
   margin-top: 10px;
@@ -184,6 +186,42 @@ p {
 
 .metric-row {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rule-panel {
+  margin-top: 10px;
+}
+
+.rule-steps {
+  margin-top: 0;
+}
+
+.rule-steps article {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(35, 38, 45, 0.7);
+}
+
+.rule-steps span {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #111;
+  background: var(--lime);
+  font-weight: 950;
+}
+
+.rule-steps p {
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 800;
 }
 
 .mvp-grid article,
@@ -415,6 +453,38 @@ p {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+}
+
+.name-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.name-list label,
+.answer-field {
+  display: grid;
+  gap: 5px;
+}
+
+.name-list span,
+.answer-field span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.name-list input,
+.answer-field input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+  font-weight: 900;
 }
 
 .count-row button,
@@ -662,6 +732,18 @@ p {
   text-align: center;
 }
 
+.answer-input-panel {
+  min-height: 500px;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.answer-input-panel .answer-field {
+  width: 100%;
+  text-align: left;
+}
+
 .role-card.fake {
   background:
     linear-gradient(150deg, rgba(255, 77, 109, 0.24), transparent 40%),
@@ -886,6 +968,48 @@ button.answer-card {
 
 .floating {
   margin-top: 12px;
+}
+
+.launch-panel {
+  margin-top: 10px;
+}
+
+.launch-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+.launch-grid button {
+  min-height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 900;
+}
+
+.launch-grid button span {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.68rem;
+}
+
+.launch-grid button.checked {
+  border-color: rgba(184, 243, 95, 0.56);
+  background: rgba(184, 243, 95, 0.12);
+}
+
+.launch-grid button.checked span {
+  color: #111;
+  background: var(--lime);
 }
 
 @media (max-width: 360px) {

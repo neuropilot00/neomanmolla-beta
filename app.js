@@ -26,6 +26,14 @@ const state = {
   selectedFrame: frames[0].id,
   selectedTheme: themes[0],
   selectedPack: packs[0].name,
+  customNames: [...playerNames],
+  currentAnswer: "",
+  launchChecklist: {
+    rule: false,
+    result: false,
+    replay: false,
+    invite: false,
+  },
   toast: "",
 };
 
@@ -33,6 +41,10 @@ const app = document.querySelector("#app");
 
 function sample(list) {
   return list[Math.floor(Math.random() * list.length)];
+}
+
+function cleanText(value, fallback = "") {
+  return String(value || fallback).replace(/[<>"'&]/g, "").trim();
 }
 
 function generateRoomCode() {
@@ -47,6 +59,7 @@ function saveSettings() {
       selectedFrame: state.selectedFrame,
       selectedPack: state.selectedPack,
       selectedTheme: state.selectedTheme,
+      customNames: state.customNames,
     }),
   );
 }
@@ -58,6 +71,7 @@ function loadSettings() {
     if (frames.some((frame) => frame.id === saved.selectedFrame)) state.selectedFrame = saved.selectedFrame;
     if (packs.some((pack) => pack.name === saved.selectedPack)) state.selectedPack = saved.selectedPack;
     if (themes.includes(saved.selectedTheme)) state.selectedTheme = saved.selectedTheme;
+    if (Array.isArray(saved.customNames)) state.customNames = playerNames.map((name, index) => cleanText(saved.customNames[index], name));
   } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
@@ -118,9 +132,12 @@ function feedbackText() {
     `방 테마: ${state.selectedTheme}`,
     `혼자 플레이 시작: ${stats.soloStart || 0}`,
     `결과 확인: ${stats.resultView || 0}`,
+    `초대 복사: ${stats.inviteCopy || 0}`,
     "1. 룰 이해:",
     "2. 왜 가짜인지 납득:",
-    "3. 친구에게 보낼 의향:",
+    "3. 3판 이상 재플레이 의향:",
+    "4. 친구에게 보낼 의향:",
+    "5. 돈 내도 살 질문팩:",
   ].join("\n");
 }
 
@@ -135,8 +152,8 @@ async function copyText(text, message) {
 }
 
 function players() {
-  return playerNames.slice(0, state.playerCount).map((name, index) => ({
-    name,
+  return state.customNames.slice(0, state.playerCount).map((name, index) => ({
+    name: cleanText(name, playerNames[index]),
     avatar: avatars[index],
     index,
     fake: index === state.fakeIndex,
@@ -177,13 +194,14 @@ function startGame() {
   state.revealed = [];
   state.answers = players().map((player) => ({
     player: player.name,
-    text: sample(currentRound().answers),
+    text: "",
     question: player.fake ? currentRound().fake : currentRound().innocent,
     role: player.fake ? "가짜 질문" : "공통 질문",
     suspicious: player.fake,
   }));
   state.votes = Array(state.playerCount).fill(null);
   state.selectedVote = null;
+  state.currentAnswer = "";
   state.log = ["방 생성 완료", "한 명만 다른 질문을 받았습니다"];
   render();
 }
@@ -236,10 +254,40 @@ function nextRole() {
   if (state.hostIndex < state.playerCount - 1) {
     state.hostIndex += 1;
   } else {
-    state.phase = "answer";
-    state.log.unshift("답변 공개 준비");
+    state.hostIndex = 0;
+    state.currentAnswer = "";
+    state.phase = "answerInput";
+    state.log.unshift("답변 입력 시작");
   }
   render();
+}
+
+function submitAnswer() {
+  const answer = cleanText(state.currentAnswer);
+  if (!answer) {
+    state.toast = "짧게라도 답변을 적어야 다음으로 넘어가요";
+    render();
+    return;
+  }
+
+  state.answers[state.hostIndex].text = answer;
+  state.currentAnswer = "";
+  if (state.hostIndex < state.playerCount - 1) {
+    state.hostIndex += 1;
+    render();
+    return;
+  }
+
+  state.phase = "answer";
+  state.log.unshift("모든 답변 입력 완료");
+  render();
+}
+
+function quickAnswer() {
+  const round = currentRound();
+  const pool = state.hostIndex === state.fakeIndex ? round.fakeAnswers || round.answers : round.botAnswers || round.answers;
+  state.currentAnswer = sample(pool);
+  submitAnswer();
 }
 
 function revealAnswers() {
@@ -387,7 +435,12 @@ function roomCreateView() {
       <div class="room-preview">
         <span>ROOM ${state.roomCode}</span>
         <strong>${state.selectedTheme}</strong>
-        <p>${state.selectedPack} 질문팩 · 4명 · 링크 초대</p>
+        <p>${state.selectedPack} 질문팩 · ${state.playerCount}명 · 링크 초대</p>
+      </div>
+      <div class="count-row">
+        ${[4, 5, 6].map((count) => `
+          <button class="${state.playerCount === count ? "active" : ""}" data-count="${count}">${count}명</button>
+        `).join("")}
       </div>
       <div class="option-group">
         <span>방 테마</span>
@@ -439,6 +492,17 @@ function frameLabel(frame) {
 
 function mvpOverview() {
   return `
+    <section class="panel rule-panel">
+      <div class="section-head">
+        <span>How To Play</span>
+        <strong>10초 룰</strong>
+      </div>
+      <div class="rule-steps">
+        <article><span>1</span><p>한 명만 비슷하지만 다른 질문을 받습니다.</p></article>
+        <article><span>2</span><p>각자 답변을 보고 어색한 사람을 찾습니다.</p></article>
+        <article><span>3</span><p>투표 후 질문이 공개되면 바로 납득되어야 합니다.</p></article>
+      </div>
+    </section>
     <section class="mvp-grid">
       <article>
         <span>Core Loop</span>
@@ -489,6 +553,32 @@ function monetizePanel() {
       </div>
       <div class="live-pill">MVP</div>
     </section>
+    ${launchPanel()}
+  `;
+}
+
+function launchPanel() {
+  const items = [
+    ["rule", "첫판 룰 이해"],
+    ["result", "결과 납득"],
+    ["replay", "3판 재시도"],
+    ["invite", "친구 초대"],
+  ];
+  return `
+    <section class="panel launch-panel">
+      <div class="section-head">
+        <span>Pre Open</span>
+        <strong>런칭 전 검증</strong>
+      </div>
+      <div class="launch-grid">
+        ${items.map(([key, label]) => `
+          <button class="${state.launchChecklist[key] ? "checked" : ""}" data-check="${key}">
+            <span>${state.launchChecklist[key] ? "OK" : "?"}</span>${label}
+          </button>
+        `).join("")}
+      </div>
+      <p>네 칸이 다 OK가 되면 광고보다 친구 초대부터 열어볼 만합니다.</p>
+    </section>
   `;
 }
 
@@ -497,10 +587,18 @@ function partyReadyView() {
     <section class="panel intro">
       <div class="tag">Party Demo</div>
       <h2>한 명만 다른 질문을 받습니다.</h2>
-      <p>답변을 보고 누가 어색한지 찾아내세요. 억울하면 말로 살아남으면 됩니다.</p>
+      <p>휴대폰을 넘기며 질문 확인, 답변 입력, 투표까지 한 기기에서 테스트합니다.</p>
       <div class="count-row">
         ${[4, 5, 6].map((count) => `
           <button class="${state.playerCount === count ? "active" : ""}" data-count="${count}">${count}명</button>
+        `).join("")}
+      </div>
+      <div class="name-list">
+        ${players().map((player) => `
+          <label>
+            <span>${player.index + 1}P</span>
+            <input data-name-index="${player.index}" value="${player.name}" maxlength="8" />
+          </label>
         `).join("")}
       </div>
       <button class="primary full" data-action="start">게임 시작</button>
@@ -615,8 +713,28 @@ function answerView() {
     <section class="panel">
       <div class="tag">${currentRound().title}</div>
       <h2>모두 답변을 적었습니다.</h2>
-      <p>실제 버전에서는 각자 휴대폰에서 직접 입력합니다. 지금은 분위기 확인용으로 자동 답변을 넣었어요.</p>
+      <p>이제 답변을 공개하고 누가 다른 질문을 받았는지 토론하세요.</p>
       <button class="primary full" data-action="reveal">답변 공개</button>
+    </section>
+    ${playerList(true)}
+  `);
+}
+
+function answerInputView() {
+  const answer = state.answers[state.hostIndex];
+  shell(`
+    ${quitBar()}
+    <section class="panel answer-input-panel">
+      <div class="turn-line">${answer.player}님 답변</div>
+      ${avatarMarkup(state.hostIndex, "big")}
+      <h2>${answer.role}</h2>
+      <p class="question">${answer.question}</p>
+      <label class="answer-field">
+        <span>짧게 답변</span>
+        <input data-answer-input="true" value="${state.currentAnswer}" maxlength="18" placeholder="예: 치킨" autofocus />
+      </label>
+      <button class="primary full" data-action="submit-answer">${state.hostIndex === state.playerCount - 1 ? "답변 완료" : "다음 사람"}</button>
+      <button class="secondary full" data-action="quick-answer">테스트 답변 자동 입력</button>
     </section>
     ${playerList(true)}
   `);
@@ -817,6 +935,7 @@ function render() {
   if (state.phase === "soloResult") soloResultView();
   if (state.phase === "soloGameOver") soloGameOverView();
   if (state.phase === "roles") roleView();
+  if (state.phase === "answerInput") answerInputView();
   if (state.phase === "answer") answerView();
   if (state.phase === "talk") talkView();
   if (state.phase === "vote") voteView();
@@ -828,6 +947,10 @@ app.addEventListener("click", (event) => {
   if (!button) return;
 
   if (button.dataset.count) setPlayerCount(Number(button.dataset.count));
+  if (button.dataset.check) {
+    state.launchChecklist[button.dataset.check] = !state.launchChecklist[button.dataset.check];
+    render();
+  }
   if (button.dataset.action === "solo-start") startSolo();
   if (button.dataset.action === "copy-invite") {
     copyText(roomInviteUrl(), "초대 링크를 복사했습니다");
@@ -870,6 +993,8 @@ app.addEventListener("click", (event) => {
   }
   if (button.dataset.action === "start") startGame();
   if (button.dataset.action === "next-role") nextRole();
+  if (button.dataset.action === "submit-answer") submitAnswer();
+  if (button.dataset.action === "quick-answer") quickAnswer();
   if (button.dataset.action === "reveal") revealAnswers();
   if (button.dataset.action === "vote") beginVote();
   if (button.dataset.action === "again") resetRound();
@@ -896,6 +1021,18 @@ app.addEventListener("click", (event) => {
     render();
   }
   if (button.dataset.vote !== undefined) castVote(Number(button.dataset.vote));
+});
+
+app.addEventListener("input", (event) => {
+  const input = event.target;
+  if (input.dataset.nameIndex !== undefined) {
+    const index = Number(input.dataset.nameIndex);
+    state.customNames[index] = cleanText(input.value, playerNames[index]);
+    saveSettings();
+  }
+  if (input.dataset.answerInput) {
+    state.currentAnswer = input.value;
+  }
 });
 
 loadSettings();
