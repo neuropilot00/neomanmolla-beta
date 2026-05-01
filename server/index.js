@@ -146,7 +146,11 @@ function themeById(id) {
   return gameData.themes.find((theme) => theme.id === id) || gameData.themes[0];
 }
 
-function questionThemeById(id) {
+function questionThemeById(id, pack = null) {
+  if (pack?.questionThemes?.length) {
+    if (!id || id === "all") return { id: "all", name: "전체 테마" };
+    return pack.questionThemes.find((theme) => theme.id === id) || { id: "all", name: "전체 테마" };
+  }
   if (!id || id === "all") return { id: "all", name: "전체 그룹" };
   return gameData.idolGroups.find((group) => group.id === id) || { id: "all", name: "전체 그룹" };
 }
@@ -154,7 +158,11 @@ function questionThemeById(id) {
 function localizedPackFor(lang, packId) {
   const pack = packById(packId);
   const translated = gameData.locales?.[lang]?.packs?.[pack.id];
-  return translated ? { ...pack, ...translated } : pack;
+  if (!translated) return pack;
+  const rounds = translated.rounds
+    ? pack.rounds.map((round, index) => ({ ...round, ...(translated.rounds[index] || {}) }))
+    : pack.rounds;
+  return { ...pack, ...translated, rounds };
 }
 
 function publicRoom(room, viewerId = null) {
@@ -193,12 +201,20 @@ function publicRoom(room, viewerId = null) {
 
 function roundForRoom(room) {
   const pack = packById(room.pack.id);
-  return pack.rounds[room.roundIndex % pack.rounds.length];
+  const themed = room.questionTheme?.id && room.questionTheme.id !== "all"
+    ? pack.rounds.filter((round) => Array.isArray(round.themes) && round.themes.includes(room.questionTheme.id))
+    : pack.rounds;
+  const rounds = themed.length ? themed : pack.rounds;
+  return rounds[room.roundIndex % rounds.length];
 }
 
 function roundForPlayer(room, player) {
   const pack = localizedPackFor(player.lang, room.pack.id);
-  return pack.rounds[room.roundIndex % pack.rounds.length];
+  const themed = room.questionTheme?.id && room.questionTheme.id !== "all"
+    ? pack.rounds.filter((round) => Array.isArray(round.themes) && round.themes.includes(room.questionTheme.id))
+    : pack.rounds;
+  const rounds = themed.length ? themed : pack.rounds;
+  return rounds[room.roundIndex % rounds.length];
 }
 
 async function createRoom(body) {
@@ -216,7 +232,7 @@ async function createRoom(body) {
     playerCount,
     pack: { id: pack.id, name: pack.name },
     theme: { id: theme.id, label: theme.label },
-    questionTheme: questionThemeById(body.questionThemeId || pack.defaultQuestionTheme),
+    questionTheme: questionThemeById(body.questionThemeId || pack.defaultQuestionTheme, pack),
     roundIndex: Math.floor(Math.random() * pack.rounds.length),
     fakeIndex: Math.floor(Math.random() * playerCount),
     players: Array.from({ length: playerCount }).map((_, index) => ({

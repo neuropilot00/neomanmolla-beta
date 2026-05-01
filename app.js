@@ -28,9 +28,17 @@ const COPY = {
     profileTitle: "내 캐릭터 꾸미기",
     me: "나",
     frameApplied: "프레임 적용 중",
+    body: "베이스",
     hair: "헤어",
-    outfit: "의상",
-    hat: "모자",
+    eyes: "눈",
+    lips: "입술",
+    beauty: "얼굴 포인트",
+    accessory: "악세",
+    top: "상의",
+    pants: "하의",
+    shoes: "신발",
+    outfit: "세트 의상",
+    hat: "헤드",
     face: "얼굴",
     item: "소품",
     back: "배경",
@@ -170,9 +178,17 @@ const COPY = {
     profileTitle: "キャラを着せ替え",
     me: "自分",
     frameApplied: "フレーム適用中",
+    body: "ベース",
     hair: "ヘア",
-    outfit: "衣装",
-    hat: "帽子",
+    eyes: "目",
+    lips: "リップ",
+    beauty: "顔ポイント",
+    accessory: "アクセ",
+    top: "トップス",
+    pants: "ボトムス",
+    shoes: "シューズ",
+    outfit: "セット衣装",
+    hat: "ヘッド",
     face: "顔",
     item: "小物",
     back: "背景",
@@ -315,7 +331,15 @@ const state = {
   selectedPose: settings.characterPoses[0].id,
   selectedFrame: frames[0].id,
   selectedBiasStyle: biasStyles[0].id,
+  selectedBody: dressUp.body[0].id,
   selectedHair: dressUp.hair[0].id,
+  selectedEyes: dressUp.eyes[0].id,
+  selectedLips: dressUp.lips[0].id,
+  selectedBeauty: dressUp.beauty[0].id,
+  selectedAccessory: dressUp.accessory[0].id,
+  selectedTop: dressUp.top[1].id,
+  selectedPants: dressUp.pants[1].id,
+  selectedShoes: dressUp.shoes[1].id,
   selectedOutfit: dressUp.outfit[0].id,
   selectedHat: dressUp.hat[0].id,
   selectedFace: dressUp.face[0].id,
@@ -383,12 +407,20 @@ function packId(pack) {
 
 function localizedPack(pack) {
   const translated = localeData()?.packs?.[packId(pack)];
-  return translated ? { ...pack, ...translated, id: packId(pack), baseName: pack.name } : { ...pack, baseName: pack.name };
+  if (!translated) return { ...pack, baseName: pack.name };
+  const rounds = translated.rounds
+    ? pack.rounds.map((round, index) => ({ ...round, ...(translated.rounds[index] || {}) }))
+    : pack.rounds;
+  return { ...pack, ...translated, rounds, id: packId(pack), baseName: pack.name };
 }
 
 function localizedPackFor(lang, pack) {
   const translated = localeDataFor(lang)?.packs?.[packId(pack)];
-  return translated ? { ...pack, ...translated, id: packId(pack), baseName: pack.name } : { ...pack, baseName: pack.name };
+  if (!translated) return { ...pack, baseName: pack.name };
+  const rounds = translated.rounds
+    ? pack.rounds.map((round, index) => ({ ...round, ...(translated.rounds[index] || {}) }))
+    : pack.rounds;
+  return { ...pack, ...translated, rounds, id: packId(pack), baseName: pack.name };
 }
 
 function localizedPacks() {
@@ -408,6 +440,12 @@ function selectedBasePack() {
 }
 
 function questionThemesForPack(pack = selectedBasePack()) {
+  if (Array.isArray(pack.questionThemes) && pack.questionThemes.length) {
+    return [
+      { id: "all", name: t("allGroups"), tags: [pack.name] },
+      ...pack.questionThemes,
+    ];
+  }
   if (pack.themeSource !== "idolGroups") return [];
   return [
     { id: "all", name: t("allGroups"), tags: [pack.name] },
@@ -923,6 +961,32 @@ function avatarMarkup(index, extraClass = "") {
   return `<span class="${className}"><img src="${avatar.src}" alt="" /></span>`;
 }
 
+function miniMeAvatarMarkup(extraClass = "") {
+  const body = dressOption("body", state.selectedBody);
+  const hair = dressOption("hair", state.selectedHair);
+  const eyes = dressOption("eyes", state.selectedEyes);
+  const lips = dressOption("lips", state.selectedLips);
+  const accessory = dressOption("accessory", state.selectedAccessory);
+  const beauty = dressOption("beauty", state.selectedBeauty);
+  const className = ["avatar", "custom-face-avatar", extraClass].filter(Boolean).join(" ");
+  return `
+    <span class="${className}" style="--skin:${body.skin || "#f3b27d"};--hair:${hair.color || "#16181d"};--hair-accent:${hair.accent || hair.color || "#16181d"};--eyes:${eyes.color || "#17191f"};--lips:${lips.color || "#d86a70"};">
+      <i class="face-head"></i>
+      <i class="face-hair"></i>
+      <i class="face-eye left"></i>
+      <i class="face-eye right"></i>
+      <i class="face-lip"></i>
+      ${beauty.id !== "none" ? `<i class="face-beauty">${beauty.symbol || "."}</i>` : ""}
+      ${accessory.id !== "none" ? `<i class="face-accessory">${accessory.symbol || ""}</i>` : ""}
+    </span>
+  `;
+}
+
+function playerAvatarMarkup(index, extraClass = "", playerId = "") {
+  if (index === 0 || (playerId && playerId === state.onlinePlayerId)) return miniMeAvatarMarkup(extraClass);
+  return avatarMarkup(index, extraClass);
+}
+
 function profileAvatarMarkup(extraClass = "") {
   return avatarMarkup(state.selectedAvatar, extraClass);
 }
@@ -930,17 +994,42 @@ function profileAvatarMarkup(extraClass = "") {
 function fullBodyAvatarMarkup() {
   const aura = dressOption("aura", state.selectedAura).color || "#ffd166";
   const item = dressOption("item", state.selectedItem);
-  const hat = dressOption("hat", state.selectedHat);
-  const face = dressOption("face", state.selectedFace);
+  const body = dressOption("body", state.selectedBody);
+  const hair = dressOption("hair", state.selectedHair);
+  const eyes = dressOption("eyes", state.selectedEyes);
+  const lips = dressOption("lips", state.selectedLips);
+  const beauty = dressOption("beauty", state.selectedBeauty);
+  const accessory = dressOption("accessory", state.selectedAccessory);
+  const top = dressOption("top", state.selectedTop);
+  const pants = dressOption("pants", state.selectedPants);
+  const shoes = dressOption("shoes", state.selectedShoes);
   const back = dressOption("back", state.selectedBack);
   return `
-    <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="--aura:${aura};">
+    <div class="stage-avatar ${state.selectedFrame} ${state.selectedBiasStyle}" style="--aura:${aura};--skin:${body.skin || "#f3b27d"};--hair:${hair.color || "#16181d"};--hair-accent:${hair.accent || hair.color || "#16181d"};--eyes:${eyes.color || "#17191f"};--lips:${lips.color || "#d86a70"};--top:${top.color || "#20232b"};--top-trim:${top.trim || "#ff4d6d"};--pants:${pants.color || "#17191f"};--shoes:${shoes.color || "#101114"};">
       ${back.id !== "none" ? `<span class="closet-back">${back.symbol || ""}</span>` : ""}
       <span class="stage-aura"></span>
-      ${spriteCellMarkup(state.selectedAvatar % characterSetForProfile().columns, selectedPoseIndex(), "profile-sprite")}
-      ${hat.id !== "none" ? `<span class="closet-hat">${hat.symbol || ""}</span>` : ""}
-      ${face.id !== "none" ? `<span class="closet-face">${face.symbol || ""}</span>` : ""}
-      <span class="closet-hand-item">${item.symbol || ""}</span>
+      <span class="layered-character">
+        <i class="lc-shadow"></i>
+        <i class="lc-leg left"></i>
+        <i class="lc-leg right"></i>
+        <i class="lc-shoe left"></i>
+        <i class="lc-shoe right"></i>
+        <i class="lc-body"></i>
+        <i class="lc-arm left"></i>
+        <i class="lc-arm right"></i>
+        <i class="lc-hand left"></i>
+        <i class="lc-hand right"></i>
+        <i class="lc-neck"></i>
+        <i class="lc-head"></i>
+        <i class="lc-hair back"></i>
+        <i class="lc-hair front"></i>
+        <i class="lc-eye left"></i>
+        <i class="lc-eye right"></i>
+        <i class="lc-mouth"></i>
+        ${beauty.id !== "none" ? `<i class="lc-beauty ${beauty.id}">${beauty.symbol || "."}</i>` : ""}
+        ${accessory.id !== "none" ? `<i class="lc-accessory ${accessory.id}">${accessory.symbol || ""}</i>` : ""}
+        ${item.id !== "none" ? `<i class="lc-item">${item.symbol || ""}</i>` : ""}
+      </span>
     </div>
   `;
 }
@@ -954,7 +1043,10 @@ function selectedPack() {
 }
 
 function activeRounds() {
-  return selectedPack().rounds;
+  const pack = selectedPack();
+  if (!state.selectedQuestionTheme || state.selectedQuestionTheme === "all") return pack.rounds;
+  const themed = pack.rounds.filter((round) => Array.isArray(round.themes) && round.themes.includes(state.selectedQuestionTheme));
+  return themed.length ? themed : pack.rounds;
 }
 
 function currentRound() {
@@ -1243,7 +1335,7 @@ function profileView() {
         <div>
           <strong>${t("me")}</strong>
           <p>${group.name} · ${biasStyleLabel(state.selectedBiasStyle)}</p>
-          <small>${dressLabel("hair", state.selectedHair)} / ${dressLabel("outfit", state.selectedOutfit)} / ${dressLabel("hat", state.selectedHat)} / ${dressLabel("back", state.selectedBack)} / ${frameLabel(state.selectedFrame)} ${t("frameApplied")}</small>
+          <small>${dressLabel("hair", state.selectedHair)} / ${dressLabel("top", state.selectedTop)} / ${dressLabel("pants", state.selectedPants)} / ${dressLabel("shoes", state.selectedShoes)} / ${frameLabel(state.selectedFrame)} ${t("frameApplied")}</small>
         </div>
       </div>
       <div class="tab-row">
@@ -1422,7 +1514,7 @@ function onlineRoomView() {
         <div class="players">
           ${room.players.map((player) => `
             <article>
-              ${avatarMarkup(player.avatarIndex || 0)}
+              ${playerAvatarMarkup(player.avatarIndex || 0, "", player.id)}
               <span>${player.name}</span>
               <small>${player.connected ? t("statusJoined") : t("statusWait")}</small>
             </article>
@@ -1458,7 +1550,7 @@ function onlineVoteMarkup(room) {
     <section class="answers">
       ${room.answers.map((answer, index) => `
         <article class="answer-card">
-          ${avatarMarkup(index)}
+          ${playerAvatarMarkup(index, "", player.id)}
           <div>
             <strong>${answer.playerName}</strong>
             <p>${answer.text}</p>
@@ -1469,7 +1561,7 @@ function onlineVoteMarkup(room) {
     <div class="vote-grid">
       ${room.players.map((player) => `
         <button data-online-vote="${player.id}">
-          ${avatarMarkup(player.avatarIndex || 0)}
+          ${playerAvatarMarkup(player.avatarIndex || 0, "", player.id)}
           <strong>${player.name}</strong>
         </button>
       `).join("")}
@@ -1487,7 +1579,7 @@ function onlineResultMarkup(room) {
     <section class="answers">
       ${room.answers.map((answer, index) => `
         <article class="answer-card ${answer.playerId === result.fakePlayerId ? "highlight" : ""}">
-          ${avatarMarkup(index)}
+          ${playerAvatarMarkup(index, "", player.id)}
           <div>
             <strong>${answer.playerName}</strong>
             <p>${answer.text}</p>
@@ -1648,7 +1740,7 @@ function soloView() {
     <section class="answers solo-answers">
       ${state.answers.map((answer, index) => `
         <button class="answer-card pick-card" data-vote="${index}">
-          ${avatarMarkup(index)}
+          ${playerAvatarMarkup(index)}
           <div>
             <strong>${answer.player}</strong>
             <p>${answer.text}</p>
@@ -1720,7 +1812,7 @@ function roleView() {
     ${quitBar()}
     <section class="panel role-card ${player.fake ? "fake" : ""}">
       <div class="turn-line">${player.name}${tt(lang, "hostTurn")} · ${lang.toUpperCase()}</div>
-      ${avatarMarkup(player.index, "big")}
+      ${playerAvatarMarkup(player.index, "big")}
       <h2>${player.fake ? tt(lang, "yourDifferentQuestion") : tt(lang, "commonQuestion")}</h2>
       <p class="question">${answer.question}</p>
       <button class="primary full" data-action="next-role">
@@ -1751,7 +1843,7 @@ function answerInputView() {
     ${quitBar()}
     <section class="panel answer-input-panel">
       <div class="turn-line">${answer.player}${tt(lang, "answerTurn")} · ${lang.toUpperCase()}</div>
-      ${avatarMarkup(state.hostIndex, "big")}
+      ${playerAvatarMarkup(state.hostIndex, "big")}
       <h2>${answer.role}</h2>
       <p class="question">${answer.question}</p>
       <label class="answer-field">
@@ -1771,7 +1863,7 @@ function talkView() {
     <section class="answers">
       ${state.answers.map((answer, index) => `
         <article class="answer-card">
-          ${avatarMarkup(index)}
+          ${playerAvatarMarkup(index)}
           <div>
             <strong>${answer.player}</strong>
             <p>${answer.text}</p>
@@ -1796,7 +1888,7 @@ function voteView() {
       <div class="vote-grid">
         ${players().map((player) => `
           <button data-vote="${player.index}">
-            ${avatarMarkup(player.index)}
+            ${playerAvatarMarkup(player.index)}
             <strong>${player.name}</strong>
           </button>
         `).join("")}
@@ -1821,7 +1913,7 @@ function resultView() {
     <section class="answers">
       ${players().map((player, index) => `
         <article class="answer-card ${player.fake ? "highlight" : ""}">
-          ${avatarMarkup(index)}
+          ${playerAvatarMarkup(index)}
           <div>
             <strong>${player.name}</strong>
             <p>${state.answers[index].text}</p>
@@ -1894,7 +1986,7 @@ function soloRevealList() {
     <section class="answers">
       ${state.answers.map((answer, index) => `
         <article class="answer-card ${index === state.fakeIndex ? "highlight" : ""} ${index === state.selectedVote ? "picked" : ""}">
-          ${avatarMarkup(index)}
+          ${playerAvatarMarkup(index)}
           <div>
             <strong>${answer.player}</strong>
             <p>${answer.text}</p>
@@ -1912,7 +2004,7 @@ function playerList(showStatus) {
     <section class="players">
       ${players().map((player, index) => `
         <article>
-          ${avatarMarkup(index)}
+          ${playerAvatarMarkup(index)}
           <span>${player.name}</span>
           ${showStatus ? `<small>${state.revealed[index] ? t("statusDone") : index === state.hostIndex ? t("statusChecking") : t("statusWait")}</small>` : `<small>${t("statusJoined")}</small>`}
         </article>

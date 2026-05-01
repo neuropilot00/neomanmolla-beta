@@ -60,13 +60,13 @@ button {
 }
 
 .back-button {
-  min-width: 38px;
-  min-height: 30px;
+  min-width: 54px;
+  min-height: 42px;
   border: 1px solid rgba(184, 243, 95, 0.45);
-  border-radius: 999px;
+  border-radius: 14px;
   color: #101114;
   background: var(--lime);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-weight: 950;
 }
 
@@ -77,13 +77,13 @@ button {
 }
 
 .settings-button {
-  min-height: 30px;
+  min-height: 42px;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0 10px;
+  border-radius: 14px;
+  padding: 0 14px;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.06);
-  font-size: 0.72rem;
+  font-size: 0.84rem;
   font-weight: 950;
 }
 
@@ -498,7 +498,7 @@ p {
 
 .profile-preview {
   display: grid;
-  grid-template-columns: 124px minmax(0, 1fr);
+  grid-template-columns: 140px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
   padding: 14px;
@@ -535,10 +535,10 @@ p {
 
 .stage-avatar {
   position: relative;
-  width: 124px;
-  height: 154px;
+  width: 140px;
+  height: 186px;
   display: grid;
-  place-items: end center;
+  place-items: center;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -603,11 +603,336 @@ p {
 
 .stage-aura {
   position: absolute;
-  inset: 14px 18px 34px;
+  inset: 18px 18px 42px;
   border-radius: 50%;
   border: 2px solid var(--aura);
   opacity: 0.44;
   filter: drop-shadow(0 0 10px var(--aura));
+}
+
+.layered-character,
+.layered-character i {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+}
+
+.layered-character {
+  z-index: 3;
+  width: 104px;
+  height: 164px;
+  left: 50%;
+  bottom: 9px;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+}
+
+.lc-shadow {
+  left: 16px;
+  bottom: 0;
+  width: 72px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.lc-leg {
+  top: 102px;
+  width: 18px;
+  height: 44px;
+  border: 2px solid rgba(0, 0, 0, 0.34);
+  border-radius: 8px 8px 5px 5px;
+  background: var(--pants);
+}
+
+.lc-leg.left {
+  left: 31px;
+}
+
+.lc-leg.right {
+  right: 31px;
+}
+
+.lc-shoe {
+  top: 141px;
+  width: 28px;
+  height: 13px;
+  border: 2px solid rgba(0, 0, 0, 0.42);
+  border-radius: 8px 8px 5px 5px;
+  background: var(--shoes);
+}
+
+.lc-shoe.left {
+  left: 22px;
+}
+
+.lc-shoe.right {
+  right: 22px;
+}
+
+.lc-body {
+  top: 69px;
+  left: 27px;
+  width: 50px;
+  height: 48px;
+  border: 3px solid rgba(0, 0, 0, 0.38);
+  border-radius: 15px 15px 10px 10px;
+  background:
+    linear-gradient(90deg, var(--top-trim) 0 14%, transparent 14% 86%, var(--top-trim) 86%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 45%),
+    var(--top);
+}
+
+.lc-arm {
+  top: 73px;
+  width: 16px;
+  height: 45px;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  border-radius: 999px;
+  background: var(--top);
+}
+
+.lc-arm.left {
+  left: 17px;
+  transform: rotate(10deg);
+}
+
+.lc-arm.right {
+  right: 17px;
+  transform: rotate(-10deg);
+}
+
+.lc-hand {
+  top: 111px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 0, 0, 0.28);
+  border-radius: 50%;
+  background: var(--skin);
+}
+
+.lc-hand.left {
+  left: 15px;
+}
+
+.lc-hand.right {
+  right: 15px;
+}
+
+.lc-neck {
+  top: 62px;
+  left: 43px;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: var(--skin);
+}
+
+.lc-head {
+  top: 24px;
+  left: 28px;
+  width: 48px;
+  height: 50px;
+  border: 3px solid rgba(0, 0, 0, 0.34);
+  border-radius: 19px 19px 17px 17px;
+  background: var(--skin);
+}
+
+.lc-hair.back {
+  top: 15px;
+  left: 22px;
+  width: 60px;
+  height: 58px;
+  border-radius: 24px 24px 18px 18px;
+  background: var(--hair);
+}
+
+.lc-hair.front {
+  top: 14px;
+  left: 25px;
+  width: 55px;
+  height: 31px;
+  border-radius: 23px 23px 9px 9px;
+  background:
+    linear-gradient(135deg, transparent 0 18%, var(--hair-accent) 18% 31%, transparent 31% 44%, var(--hair) 44%),
+    var(--hair);
+  box-shadow:
+    0 9px 0 -3px var(--hair),
+    -9px 16px 0 -8px var(--hair),
+    9px 15px 0 -8px var(--hair);
+}
+
+.lc-eye {
+  top: 48px;
+  width: 8px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--eyes);
+  box-shadow: inset 2px 2px rgba(255, 255, 255, 0.48);
+}
+
+.lc-eye.left {
+  left: 41px;
+}
+
+.lc-eye.right {
+  right: 41px;
+}
+
+.lc-mouth {
+  top: 62px;
+  left: 48px;
+  width: 9px;
+  height: 4px;
+  border-radius: 0 0 999px 999px;
+  background: var(--lips);
+}
+
+.lc-beauty {
+  top: 57px;
+  right: 35px;
+  color: #17191f;
+  font-size: 0.72rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.lc-beauty.blush {
+  right: 31px;
+  color: #ff6f8f;
+}
+
+.lc-accessory {
+  top: 43px;
+  left: 18px;
+  color: var(--aura);
+  font-size: 1rem;
+  font-weight: 950;
+  text-shadow: 0 1px 0 #101114;
+}
+
+.lc-item {
+  z-index: 6;
+  right: 2px;
+  top: 100px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+  border-radius: 50%;
+  color: #101114;
+  background: var(--aura);
+  font-size: 0.95rem;
+  font-weight: 950;
+}
+
+.custom-face-avatar {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.28)), #1b1e24;
+}
+
+.custom-face-avatar i {
+  position: absolute;
+  display: block;
+}
+
+.face-head {
+  left: 8px;
+  top: 9px;
+  width: 20px;
+  height: 22px;
+  border-radius: 9px;
+  background: var(--skin);
+}
+
+.face-hair {
+  left: 6px;
+  top: 5px;
+  width: 24px;
+  height: 15px;
+  border-radius: 12px 12px 5px 5px;
+  background: var(--hair);
+  box-shadow: 0 7px 0 -4px var(--hair-accent);
+}
+
+.face-eye {
+  top: 18px;
+  width: 4px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--eyes);
+}
+
+.face-eye.left {
+  left: 14px;
+}
+
+.face-eye.right {
+  right: 14px;
+}
+
+.face-lip {
+  left: 17px;
+  top: 26px;
+  width: 5px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--lips);
+}
+
+.face-beauty {
+  right: 10px;
+  top: 23px;
+  color: #101114;
+  font-size: 0.55rem;
+  font-weight: 950;
+}
+
+.face-accessory {
+  left: 4px;
+  top: 13px;
+  color: var(--aura);
+  font-size: 0.7rem;
+  font-weight: 950;
+}
+
+.custom-face-avatar.big .face-head {
+  left: 20px;
+  top: 19px;
+  width: 45px;
+  height: 48px;
+  border-radius: 18px;
+}
+
+.custom-face-avatar.big .face-hair {
+  left: 15px;
+  top: 10px;
+  width: 56px;
+  height: 34px;
+  border-radius: 24px 24px 10px 10px;
+}
+
+.custom-face-avatar.big .face-eye {
+  top: 40px;
+  width: 8px;
+  height: 10px;
+}
+
+.custom-face-avatar.big .face-eye.left {
+  left: 33px;
+}
+
+.custom-face-avatar.big .face-eye.right {
+  right: 33px;
+}
+
+.custom-face-avatar.big .face-lip {
+  left: 40px;
+  top: 57px;
+  width: 10px;
+  height: 4px;
 }
 
 .closet-back,
