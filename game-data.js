@@ -9,6 +9,7 @@ window.NEOMANMOLLA_DATA = {
     profileCategories: ["hair", "outfit", "item", "aura"],
     profileTabs: ["parts", "artist", "frame"],
     mainMenu: ["solo-start", "room-create", "profile", "guide", "packs", "news"],
+    questionThemePacks: ["kpop"],
     audiencePresets: [
       { id: "off", label: "관전 없음", size: 0, swing: 0 },
       { id: "small", label: "친구 20명", size: 20, swing: 0.58 },
@@ -16,6 +17,22 @@ window.NEOMANMOLLA_DATA = {
       { id: "fandom", label: "팬덤 300명", size: 300, swing: 0.7 },
     ],
   },
+  heroSlides: [
+    {
+      id: "accuse",
+      image: "./assets/ui/hero-accuse-pixel-900.png",
+      tag: "2분 소셜 추리",
+      title: "답변 하나로 친구를 의심하세요.",
+      body: "한 명만 다른 질문을 받습니다. 자연스러운 척하는 답변을 찾아내세요.",
+    },
+    {
+      id: "v01d",
+      image: "./assets/ui/hero-v01d-accuse-pixel-900.png",
+      tag: "V01D 질문 테마",
+      title: "최애 밴드 테마로 바로 시작하세요.",
+      body: "V01D를 질문 테마로 고르고 팬덤끼리 서로의 답변을 의심해보세요.",
+    },
+  ],
   playerNames: ["민서", "도윤", "지우", "하준", "서연", "유나"],
   avatars: [
     { label: "ME", src: "./assets/ui/avatar-front-blue.png" },
@@ -80,7 +97,17 @@ window.NEOMANMOLLA_DATA = {
     ],
   },
   idolGroups: [
-    { id: "v01d", type: "band", name: "v01d", tags: ["공식 등록", "5인조 밴드", "자사 아티스트"], owned: true, status: "registered" },
+    {
+      id: "v01d",
+      type: "band",
+      name: "V01D",
+      tags: ["공식 등록", "5인조 밴드", "IX Entertainment"],
+      owned: true,
+      status: "registered",
+      members: ["송유찬", "조주연", "정지섭", "케빈박", "신노스케"],
+      debut: "2026-03-11",
+      debutAlbum: "01",
+    },
     { id: "bts", type: "boy", name: "BTS", tags: ["레전드", "퍼포먼스", "글로벌"] },
     { id: "seventeen", type: "boy", name: "SEVENTEEN", tags: ["자체제작", "칼군무", "예능감"] },
     { id: "stray-kids", type: "boy", name: "Stray Kids", tags: ["강한 사운드", "퍼포먼스", "글로벌"] },
@@ -105,8 +132,8 @@ window.NEOMANMOLLA_DATA = {
       type: "artist",
       groupId: "v01d",
       date: "2026-05-01",
-      title: "v01d 등록 완료",
-      body: "남자 5인조 밴드그룹 v01d가 공식 등록되었습니다.",
+      title: "V01D 등록 완료",
+      body: "남자 5인조 밴드그룹 V01D가 공식 질문 테마로 등록되었습니다.",
     },
     {
       id: "kpop-pack-open",
@@ -121,6 +148,8 @@ window.NEOMANMOLLA_DATA = {
     {
       id: "kpop",
       name: "케이팝 팬덤",
+      themeSource: "idolGroups",
+      defaultQuestionTheme: "v01d",
       count: 52,
       status: "팬덤",
       tone: "최애 얘기만으로 바로 싸움 나는 질문",
@@ -360,12 +389,24 @@ window.NEOMANMOLLA_DATA = {
       },
       notices: {
         "v01d-registered": {
-          title: "v01d 登録完了",
-          body: "男性5人組バンドグループ v01d が公式登録されました。",
+          title: "V01D 登録完了",
+          body: "男性5人組バンドグループ V01D が公式質問テーマとして登録されました。",
         },
         "kpop-pack-open": {
           title: "K-POPファンダム質問パック追加",
           body: "推し、カムバック、コンサート、トレカのテーマで遊べます。",
+        },
+      },
+      heroSlides: {
+        accuse: {
+          tag: "2分ソーシャル推理",
+          title: "答えひとつで友だちを疑おう。",
+          body: "一人だけ違う質問を受けます。自然なふりをする答えを見抜いてください。",
+        },
+        v01d: {
+          tag: "V01D質問テーマ",
+          title: "推しバンドのテーマですぐ始めよう。",
+          body: "V01Dを質問テーマに選んで、ファンダム同士で答えを疑ってみましょう。",
         },
       },
       packs: {

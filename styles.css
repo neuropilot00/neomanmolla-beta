@@ -154,6 +154,18 @@ p {
   background: #0c0d10;
 }
 
+.hero-slider {
+  display: flex;
+  width: calc(var(--slide-count) * 100%);
+  animation: hero-slide 10s infinite;
+}
+
+.hero-slide {
+  position: relative;
+  width: calc(100% / var(--slide-count));
+  flex: 0 0 calc(100% / var(--slide-count));
+}
+
 .hero-art {
   width: 100%;
   aspect-ratio: 1 / 0.9;
@@ -161,6 +173,51 @@ p {
   object-fit: cover;
   image-rendering: auto;
   background: #111;
+}
+
+.hero-slide-copy {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(247, 243, 234, 0.14);
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: rgba(12, 13, 16, 0.74);
+  backdrop-filter: blur(4px);
+}
+
+.hero-slide-copy span {
+  color: var(--lime);
+  font-size: 0.68rem;
+  font-weight: 950;
+}
+
+.hero-slide-copy strong {
+  font-size: 0.9rem;
+  line-height: 1.12;
+}
+
+.hero-slide-copy p {
+  color: var(--ink);
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+@keyframes hero-slide {
+  0%, 42% {
+    transform: translateX(0);
+  }
+
+  50%, 92% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .hero-copy {

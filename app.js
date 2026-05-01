@@ -1,5 +1,5 @@
 const gameData = window.NEOMANMOLLA_DATA;
-const { avatars, biasStyles, dressUp, frames, idolGroups, notices, packs, playerNames, settings, themes } = gameData;
+const { avatars, biasStyles, dressUp, frames, heroSlides, idolGroups, notices, packs, playerNames, settings, themes } = gameData;
 const STORAGE_KEY = "neomanmolla-beta-state";
 const EVENTS_KEY = "neomanmolla-beta-events";
 const COPY = {
@@ -37,6 +37,8 @@ const COPY = {
     roomTheme: "방 테마",
     themeVibe: "테마 분위기",
     questionPack: "질문팩",
+    questionTheme: "질문 테마",
+    allGroups: "전체 그룹",
     playersSuffix: "명",
     packSuffix: "질문팩",
     inviteLink: "초대 링크",
@@ -160,6 +162,8 @@ const COPY = {
     roomTheme: "ルームテーマ",
     themeVibe: "テーマの雰囲気",
     questionPack: "質問パック",
+    questionTheme: "質問テーマ",
+    allGroups: "全グループ",
     playersSuffix: "人",
     packSuffix: "質問パック",
     inviteLink: "招待リンク",
@@ -282,6 +286,7 @@ const state = {
   selectedIdolGroup: idolGroups[0].id,
   selectedTheme: themes[0].id,
   selectedPack: packs[0].name,
+  selectedQuestionTheme: packs[0].defaultQuestionTheme || "all",
   selectedAudiencePreset: settings.audiencePresets[0].id,
   profileTab: settings.profileTabs[0],
   lang: "ko",
@@ -356,6 +361,42 @@ function selectedBasePack() {
   return packs.find((item) => item.name === state.selectedPack || packId(item) === state.selectedPack) || packs[0];
 }
 
+function questionThemesForPack(pack = selectedBasePack()) {
+  if (pack.themeSource !== "idolGroups") return [];
+  return [
+    { id: "all", name: t("allGroups"), tags: [pack.name] },
+    ...idolGroups,
+  ];
+}
+
+function validQuestionTheme(id, pack = selectedBasePack()) {
+  return questionThemesForPack(pack).some((item) => item.id === id);
+}
+
+function selectedQuestionTheme() {
+  const pack = selectedBasePack();
+  const themesForPack = questionThemesForPack(pack);
+  if (!themesForPack.length) return null;
+  return themesForPack.find((item) => item.id === state.selectedQuestionTheme)
+    || themesForPack.find((item) => item.id === pack.defaultQuestionTheme)
+    || themesForPack[0];
+}
+
+function selectedQuestionThemeLabel() {
+  return selectedQuestionTheme()?.name || "";
+}
+
+function resetQuestionThemeForPack(pack = selectedBasePack()) {
+  const themesForPack = questionThemesForPack(pack);
+  if (!themesForPack.length) {
+    state.selectedQuestionTheme = "all";
+    return;
+  }
+  if (!themesForPack.some((item) => item.id === state.selectedQuestionTheme)) {
+    state.selectedQuestionTheme = pack.defaultQuestionTheme || themesForPack[0].id;
+  }
+}
+
 function themeLabel(theme) {
   const item = themeById(theme);
   return localeData()?.themes?.[themeId(item)]?.label || item.label || themeId(item);
@@ -399,6 +440,11 @@ function idolStatus(group) {
 function localizedNotice(notice) {
   const translated = localeData()?.notices?.[notice.id] || {};
   return { ...notice, ...translated };
+}
+
+function localizedHeroSlide(slide) {
+  const translated = localeData()?.heroSlides?.[slide.id] || {};
+  return { ...slide, ...translated };
 }
 
 function dressOptions(type) {
@@ -484,6 +530,7 @@ function saveSettings() {
       selectedFrame: state.selectedFrame,
       selectedIdolGroup: state.selectedIdolGroup,
       selectedPack: state.selectedPack,
+      selectedQuestionTheme: state.selectedQuestionTheme,
       selectedTheme: state.selectedTheme,
       customNames: state.customNames,
       playerLangs: state.playerLangs,
@@ -504,6 +551,8 @@ function loadSettings() {
     if (frames.some((frame) => frame.id === saved.selectedFrame)) state.selectedFrame = saved.selectedFrame;
     if (idolGroups.some((group) => group.id === saved.selectedIdolGroup)) state.selectedIdolGroup = saved.selectedIdolGroup;
     if (packs.some((pack) => pack.name === saved.selectedPack || packId(pack) === saved.selectedPack)) state.selectedPack = saved.selectedPack;
+    resetQuestionThemeForPack();
+    if (validQuestionTheme(saved.selectedQuestionTheme)) state.selectedQuestionTheme = saved.selectedQuestionTheme;
     if (themes.some((theme) => themeId(theme) === saved.selectedTheme)) state.selectedTheme = saved.selectedTheme;
     if (supportedLang(saved.lang)) state.lang = saved.lang;
     if (Array.isArray(saved.customNames)) state.customNames = playerNameList().map((name, index) => cleanText(saved.customNames[index], name));
@@ -521,6 +570,9 @@ function applyUrlRoom() {
 
   state.roomCode = room;
   state.selectedPack = params.get("pack") || state.selectedPack;
+  resetQuestionThemeForPack();
+  const urlQuestionTheme = params.get("qt");
+  if (validQuestionTheme(urlQuestionTheme)) state.selectedQuestionTheme = urlQuestionTheme;
   const urlTheme = params.get("theme");
   if (themes.some((theme) => themeId(theme) === urlTheme)) state.selectedTheme = urlTheme;
   state.playerCount = Number(params.get("players")) || 4;
@@ -560,6 +612,7 @@ function roomInviteUrl() {
   url.hash = "";
   url.searchParams.set("room", state.roomCode);
   url.searchParams.set("pack", packId(selectedBasePack()));
+  if (selectedQuestionTheme()) url.searchParams.set("qt", selectedQuestionTheme().id);
   url.searchParams.set("theme", state.selectedTheme);
   url.searchParams.set("players", String(state.playerCount));
   url.searchParams.set("lang", state.lang);
@@ -575,7 +628,7 @@ function resultText() {
     `${t("fakeIs")} ${fake.player}`,
     `${t("commonQuestion")}: ${questionForPlayer(0, false)} / ${questionForPlayer(1, false)}`,
     `${t("fakeQuestion")}: ${questionForPlayer(0, true)} / ${questionForPlayer(1, true)}`,
-    `${selectedPack().name} ${t("packSuffix")}`,
+    `${selectedPack().name} ${t("packSuffix")}${selectedQuestionThemeLabel() ? ` · ${selectedQuestionThemeLabel()}` : ""}`,
     roomInviteUrl(),
   ].join("\n");
 }
@@ -854,9 +907,20 @@ function shell(content) {
 function lobbyView() {
   shell(`
     <section class="hero-card">
-      <img class="hero-art" src="./assets/ui/hero-accuse-pixel-900.png" alt="" />
+      <div class="hero-slider" style="--slide-count:${heroSlides.length}">
+        ${heroSlides.map(localizedHeroSlide).map((slide) => `
+          <article class="hero-slide">
+            <img class="hero-art" src="${slide.image}" alt="" />
+            <div class="hero-slide-copy">
+              <span>${slide.tag}</span>
+              <strong>${slide.title}</strong>
+              <p>${slide.body}</p>
+            </div>
+          </article>
+        `).join("")}
+      </div>
       <div class="hero-copy">
-        <div class="tag">${t("heroTag")}</div>
+        <div class="tag">${localizedHeroSlide(heroSlides[0]).tag}</div>
         <h2>${t("heroTitle")}</h2>
         <p>${t("heroBody")}</p>
         <div class="main-menu">
@@ -943,6 +1007,7 @@ function profileView() {
 }
 
 function roomCreateView() {
+  const questionThemes = questionThemesForPack();
   shell(`
     <section class="panel room-panel">
       <div class="section-head">
@@ -952,7 +1017,7 @@ function roomCreateView() {
       <div class="room-preview">
         <span>ROOM ${state.roomCode}</span>
         <strong>${themeLabel(state.selectedTheme)}</strong>
-        <p>${themeVibe(state.selectedTheme)}</p>
+        <p>${selectedPack().name}${selectedQuestionThemeLabel() ? ` · ${selectedQuestionThemeLabel()}` : ""} · ${themeVibe(state.selectedTheme)}</p>
       </div>
       <div class="count-row">
         ${settings.playerCounts.map((count) => `
@@ -975,6 +1040,16 @@ function roomCreateView() {
           </button>
         `).join("")}
       </div>
+      ${questionThemes.length ? `
+        <div class="option-group">
+          <span>${t("questionTheme")}</span>
+          ${questionThemes.map((theme) => `
+            <button class="${state.selectedQuestionTheme === theme.id ? "selected" : ""}" data-question-theme="${theme.id}">
+              ${theme.name}<small>${(theme.tags || []).join(" · ")}</small>
+            </button>
+          `).join("")}
+        </div>
+      ` : ""}
       <div class="invite-box">
         <span>${t("inviteLink")}</span>
         <p>${roomInviteUrl()}</p>
@@ -1024,6 +1099,7 @@ function guideView() {
 }
 
 function packsView() {
+  const questionThemes = questionThemesForPack();
   shell(`
     <section class="panel pack-panel compact-page">
       <div class="section-head">
@@ -1039,6 +1115,16 @@ function packsView() {
           <span>${pack.status}</span>
         </button>
       `).join("")}
+      ${questionThemes.length ? `
+        <div class="option-group">
+          <span>${t("questionTheme")}</span>
+          ${questionThemes.map((theme) => `
+            <button class="${state.selectedQuestionTheme === theme.id ? "selected" : ""}" data-question-theme="${theme.id}">
+              ${theme.name}<small>${(theme.tags || []).join(" · ")}</small>
+            </button>
+          `).join("")}
+        </div>
+      ` : ""}
       <button class="primary full" data-action="room-create">${t("createRoom")}</button>
       <button class="text-button" data-action="back-lobby">${t("backHome")}</button>
     </section>
@@ -1559,6 +1645,12 @@ app.addEventListener("click", (event) => {
   }
   if (button.dataset.pack !== undefined) {
     state.selectedPack = button.dataset.pack;
+    resetQuestionThemeForPack();
+    saveSettings();
+    render();
+  }
+  if (button.dataset.questionTheme !== undefined && validQuestionTheme(button.dataset.questionTheme)) {
+    state.selectedQuestionTheme = button.dataset.questionTheme;
     saveSettings();
     render();
   }
