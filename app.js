@@ -1,5 +1,5 @@
 const gameData = window.NEOMANMOLLA_DATA;
-const { avatars, biasStyles, dressUp, frames, idolGroups, packs, playerNames, themes } = gameData;
+const { avatars, biasStyles, dressUp, frames, idolGroups, notices, packs, playerNames, settings, themes } = gameData;
 const STORAGE_KEY = "neomanmolla-beta-state";
 const EVENTS_KEY = "neomanmolla-beta-events";
 const COPY = {
@@ -12,6 +12,13 @@ const COPY = {
     soloPlay: "혼자 플레이",
     createRoom: "방 만들기",
     profile: "내 프로필",
+    guide: "게임 방법",
+    packs: "질문팩",
+    news: "공지",
+    artistRegistry: "아티스트 등록 현황",
+    registered: "등록됨",
+    ownedArtist: "공식 아티스트",
+    settings: "설정",
     language: "언어",
     appLanguage: "표시 언어",
     playerLanguage: "플레이어 언어",
@@ -23,15 +30,27 @@ const COPY = {
     outfit: "의상",
     item: "소품",
     aura: "오라",
+    parts: "꾸미기",
+    artist: "최애",
+    frame: "프레임",
     createRoomTitle: "초대 링크 만들기",
     roomTheme: "방 테마",
+    themeVibe: "테마 분위기",
     questionPack: "질문팩",
     playersSuffix: "명",
     packSuffix: "질문팩",
     inviteLink: "초대 링크",
     copyInvite: "초대 링크 복사",
+    spectatorLink: "관전 링크",
+    copySpectator: "관전 링크 복사",
+    audienceMode: "관전 모드",
+    audienceVote: "시청자 투표",
+    audiencePick: "시청자는 누구를 의심하나요?",
+    audienceLocked: "시청자 예측 완료",
+    audienceResult: "시청자 예측",
     localDemo: "게임 시작",
     backHome: "처음으로",
+    openSettings: "설정",
     joinTitle: "친구가 보낸 방",
     joinBody: "친구들과 질문을 확인하고 어색한 답변을 찾아보세요.",
     joinRoom: "방 참가하기",
@@ -43,6 +62,8 @@ const COPY = {
     coreLoop: "답변 공개 -> 의심 -> 투표",
     target: "친구방, 방송, MT",
     packsTitle: "오늘의 질문팩",
+    pickPack: "질문팩 선택",
+    groupRegistered: "최애 그룹 등록 여부",
     partyTitle: "한 명만 다른 질문을 받습니다.",
     partyBody: "휴대폰을 넘기며 질문 확인, 답변 입력, 투표까지 진행합니다.",
     startGame: "게임 시작",
@@ -98,6 +119,7 @@ const COPY = {
     hostTurn: "님 차례",
     answerTurn: "님 답변",
     copiedInvite: "초대 링크를 복사했습니다",
+    copiedSpectator: "관전 링크를 복사했습니다",
     copiedResult: "결과를 복사했습니다",
     copyBlocked: "복사가 막혔어요. HTTPS 배포 링크에서는 정상 동작합니다",
     answerRequired: "짧게라도 답변을 적어야 다음으로 넘어가요",
@@ -113,6 +135,13 @@ const COPY = {
     soloPlay: "一人で遊ぶ",
     createRoom: "ルーム作成",
     profile: "プロフィール",
+    guide: "遊び方",
+    packs: "質問パック",
+    news: "お知らせ",
+    artistRegistry: "アーティスト登録状況",
+    registered: "登録済み",
+    ownedArtist: "公式アーティスト",
+    settings: "設定",
     language: "言語",
     appLanguage: "表示言語",
     playerLanguage: "プレイヤー言語",
@@ -124,15 +153,27 @@ const COPY = {
     outfit: "衣装",
     item: "小物",
     aura: "オーラ",
+    parts: "着せ替え",
+    artist: "推し",
+    frame: "フレーム",
     createRoomTitle: "招待リンクを作成",
     roomTheme: "ルームテーマ",
+    themeVibe: "テーマの雰囲気",
     questionPack: "質問パック",
     playersSuffix: "人",
     packSuffix: "質問パック",
     inviteLink: "招待リンク",
     copyInvite: "招待リンクをコピー",
+    spectatorLink: "観戦リンク",
+    copySpectator: "観戦リンクをコピー",
+    audienceMode: "観戦モード",
+    audienceVote: "視聴者投票",
+    audiencePick: "視聴者は誰を疑う？",
+    audienceLocked: "視聴者予想完了",
+    audienceResult: "視聴者予想",
     localDemo: "ゲーム開始",
     backHome: "最初へ",
+    openSettings: "設定",
     joinTitle: "友だちから届いたルーム",
     joinBody: "友だちと質問を確認して、怪しい答えを見つけましょう。",
     joinRoom: "ルームに参加",
@@ -144,6 +185,8 @@ const COPY = {
     coreLoop: "答え公開 -> 疑う -> 投票",
     target: "友だち部屋、配信、合宿",
     packsTitle: "今日の質問パック",
+    pickPack: "質問パック選択",
+    groupRegistered: "推しグループ登録状況",
     partyTitle: "一人だけ違う質問を受けます。",
     partyBody: "スマホを回しながら質問確認、答え入力、投票まで進めます。",
     startGame: "ゲーム開始",
@@ -199,6 +242,7 @@ const COPY = {
     hostTurn: "さんの番",
     answerTurn: "さんの答え",
     copiedInvite: "招待リンクをコピーしました",
+    copiedSpectator: "観戦リンクをコピーしました",
     copiedResult: "結果をコピーしました",
     copyBlocked: "コピーがブロックされました。HTTPSの公開リンクでは動作します",
     answerRequired: "短くても答えを入力すると次へ進めます",
@@ -218,6 +262,8 @@ const state = {
   revealed: [],
   answers: [],
   votes: [],
+  audienceVotes: [],
+  audiencePick: null,
   selectedVote: null,
   log: [],
   score: 0,
@@ -234,20 +280,19 @@ const state = {
   selectedItem: dressUp.item[0].id,
   selectedAura: dressUp.aura[0].id,
   selectedIdolGroup: idolGroups[0].id,
-  selectedTheme: themes[0],
+  selectedTheme: themes[0].id,
   selectedPack: packs[0].name,
+  selectedAudiencePreset: settings.audiencePresets[0].id,
+  profileTab: settings.profileTabs[0],
   lang: "ko",
   customNames: [...playerNames],
-  playerLangs: ["ko", "ja", "ko", "ja", "ko", "ja"],
+  playerLangs: [...settings.defaultPlayerLangs],
   currentAnswer: "",
   toast: "",
 };
 
 const app = document.querySelector("#app");
-const languageOptions = [
-  { id: "ko", label: "한국어" },
-  { id: "ja", label: "日本語" },
-];
+const languageOptions = settings.languages;
 
 function sample(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -299,12 +344,30 @@ function localizedPacks() {
   return packs.map(localizedPack);
 }
 
+function themeId(theme) {
+  return typeof theme === "string" ? theme : theme.id;
+}
+
+function themeById(id) {
+  return themes.find((theme) => themeId(theme) === id) || themes[0];
+}
+
 function selectedBasePack() {
   return packs.find((item) => item.name === state.selectedPack || packId(item) === state.selectedPack) || packs[0];
 }
 
 function themeLabel(theme) {
-  return localeData()?.themes?.[theme] || theme;
+  const item = themeById(theme);
+  return localeData()?.themes?.[themeId(item)]?.label || item.label || themeId(item);
+}
+
+function themeVibe(theme) {
+  const item = themeById(theme);
+  return localeData()?.themes?.[themeId(item)]?.vibe || item.vibe || "";
+}
+
+function themeAccent(theme) {
+  return themeById(theme).accent || "#b8f35f";
 }
 
 function frameLabel(frame) {
@@ -329,6 +392,15 @@ function idolTags(group) {
   return localeData()?.idolGroups?.[group.id]?.tags || group.tags;
 }
 
+function idolStatus(group) {
+  return localeData()?.idolGroups?.[group.id]?.status || (group.status === "registered" ? t("registered") : "");
+}
+
+function localizedNotice(notice) {
+  const translated = localeData()?.notices?.[notice.id] || {};
+  return { ...notice, ...translated };
+}
+
 function dressOptions(type) {
   return dressUp[type] || [];
 }
@@ -341,6 +413,26 @@ function dressOption(type, id) {
 function dressLabel(type, id) {
   const option = dressOption(type, id);
   return localeData()?.dressUp?.[type]?.[id] || option.label || id;
+}
+
+function selectedDressKey(type) {
+  return `selected${type[0].toUpperCase()}${type.slice(1)}`;
+}
+
+function profileTabLabel(tab) {
+  return t(tab);
+}
+
+function menuItems() {
+  const actions = {
+    "solo-start": { label: t("soloPlay"), className: "primary", action: "solo-start" },
+    "room-create": { label: t("createRoom"), className: "secondary", action: "room-create" },
+    profile: { label: t("profile"), className: "secondary", action: "profile" },
+    guide: { label: t("guide"), className: "secondary", action: "guide" },
+    packs: { label: t("packs"), className: "secondary", action: "packs" },
+    news: { label: t("news"), className: "secondary", action: "news" },
+  };
+  return settings.mainMenu.map((id) => actions[id]).filter(Boolean);
 }
 
 function languageSelectMarkup(selected, datasetName, label = t("language")) {
@@ -412,7 +504,7 @@ function loadSettings() {
     if (frames.some((frame) => frame.id === saved.selectedFrame)) state.selectedFrame = saved.selectedFrame;
     if (idolGroups.some((group) => group.id === saved.selectedIdolGroup)) state.selectedIdolGroup = saved.selectedIdolGroup;
     if (packs.some((pack) => pack.name === saved.selectedPack || packId(pack) === saved.selectedPack)) state.selectedPack = saved.selectedPack;
-    if (themes.includes(saved.selectedTheme)) state.selectedTheme = saved.selectedTheme;
+    if (themes.some((theme) => themeId(theme) === saved.selectedTheme)) state.selectedTheme = saved.selectedTheme;
     if (supportedLang(saved.lang)) state.lang = saved.lang;
     if (Array.isArray(saved.customNames)) state.customNames = playerNameList().map((name, index) => cleanText(saved.customNames[index], name));
     else state.customNames = [...playerNameList()];
@@ -429,7 +521,8 @@ function applyUrlRoom() {
 
   state.roomCode = room;
   state.selectedPack = params.get("pack") || state.selectedPack;
-  state.selectedTheme = params.get("theme") || state.selectedTheme;
+  const urlTheme = params.get("theme");
+  if (themes.some((theme) => themeId(theme) === urlTheme)) state.selectedTheme = urlTheme;
   state.playerCount = Number(params.get("players")) || 4;
   const urlLang = params.get("lang");
   if (supportedLang(urlLang) && state.lang !== urlLang) {
@@ -746,7 +839,10 @@ function shell(content) {
           <p class="eyebrow">${t("eyebrow")}</p>
           <h1>${t("title")}</h1>
         </div>
-        <div class="room-code">ROOM ${state.roomCode}</div>
+        <div class="top-actions">
+          <button class="settings-button" data-action="settings">${t("openSettings")}</button>
+          <div class="room-code">ROOM ${state.roomCode}</div>
+        </div>
       </header>
       ${state.toast ? `<div class="toast">${state.toast}</div>` : ""}
       ${content}
@@ -760,24 +856,22 @@ function lobbyView() {
     <section class="hero-card">
       <img class="hero-art" src="./assets/ui/hero-accuse-pixel-900.png" alt="" />
       <div class="hero-copy">
-        ${languageSelectMarkup(state.lang, "data-app-lang", t("appLanguage"))}
         <div class="tag">${t("heroTag")}</div>
         <h2>${t("heroTitle")}</h2>
         <p>${t("heroBody")}</p>
-        <button class="primary full" data-action="solo-start">${t("soloPlay")}</button>
-        <div class="hero-actions">
-          <button class="secondary" data-action="room-create">${t("createRoom")}</button>
-          <button class="secondary" data-action="profile">${t("profile")}</button>
+        <div class="main-menu">
+          ${menuItems().map((item) => `
+            <button class="${item.className}" data-action="${item.action}">${item.label}</button>
+          `).join("")}
         </div>
       </div>
     </section>
-    ${mvpOverview()}
-    ${packPreview()}
   `);
 }
 
 function profileView() {
   const group = idolGroup(state.selectedIdolGroup);
+  const tab = settings.profileTabs.includes(state.profileTab) ? state.profileTab : settings.profileTabs[0];
   shell(`
     <section class="panel profile-panel">
       <div class="section-head">
@@ -792,46 +886,57 @@ function profileView() {
           <small>${dressLabel("hair", state.selectedHair)} / ${dressLabel("outfit", state.selectedOutfit)} / ${dressLabel("item", state.selectedItem)} / ${frameLabel(state.selectedFrame)} ${t("frameApplied")}</small>
         </div>
       </div>
-      <div class="avatar-picker">
-        ${avatars.map((avatar, index) => `
-          <button class="${state.selectedAvatar === index ? "selected" : ""}" data-avatar="${index}">
-            ${avatarMarkup(index)}
-          </button>
+      <div class="tab-row">
+        ${settings.profileTabs.map((item) => `
+          <button class="${tab === item ? "selected" : ""}" data-profile-tab="${item}">${profileTabLabel(item)}</button>
         `).join("")}
       </div>
-      <div class="frame-picker">
-        ${frames.map((frame) => `
-          <button class="${state.selectedFrame === frame.id ? "selected" : ""}" data-frame="${frame.id}">
-            <span class="frame-dot ${frame.id}"></span>${frameLabel(frame.id)}
-          </button>
-        `).join("")}
-      </div>
-      ${["hair", "outfit", "item", "aura"].map((type) => `
-        <div class="option-group dress-group">
-          <span>${t(type)}</span>
-          ${dressOptions(type).map((item) => `
-            <button class="${state[`selected${type[0].toUpperCase()}${type.slice(1)}`] === item.id ? "selected" : ""}" data-dress-type="${type}" data-dress-id="${item.id}">
-              ${dressLabel(type, item.id)}<small>${item.symbol || ""}</small>
+      ${tab === "parts" ? `
+        <div class="avatar-picker">
+          ${avatars.map((avatar, index) => `
+            <button class="${state.selectedAvatar === index ? "selected" : ""}" data-avatar="${index}">
+              ${avatarMarkup(index)}
             </button>
           `).join("")}
         </div>
-      `).join("")}
-      <div class="option-group">
-        <span>최애 그룹 / 推しグループ</span>
-        ${idolGroups.map((item) => `
-          <button class="${state.selectedIdolGroup === item.id ? "selected" : ""}" data-idol-group="${item.id}">
-            ${item.name}<small>${item.type === "boy" ? "BOY" : "GIRL"} · ${idolTags(item).join(" · ")}</small>
-          </button>
+        ${settings.profileCategories.map((type) => `
+          <div class="option-group dress-group">
+            <span>${t(type)}</span>
+            ${dressOptions(type).map((item) => `
+              <button class="${state[selectedDressKey(type)] === item.id ? "selected" : ""}" data-dress-type="${type}" data-dress-id="${item.id}">
+                ${dressLabel(type, item.id)}<small>${item.symbol || ""}</small>
+              </button>
+            `).join("")}
+          </div>
         `).join("")}
-      </div>
-      <div class="option-group">
-        <span>최애 포지션 / 推しポジション</span>
-        ${biasStyles.map((style) => `
-          <button class="${state.selectedBiasStyle === style.id ? "selected" : ""}" data-bias-style="${style.id}">
-            ${biasStyleLabel(style.id)}<small>${biasStyleDetail(style.id)}</small>
-          </button>
-        `).join("")}
-      </div>
+      ` : ""}
+      ${tab === "artist" ? `
+        <div class="option-group">
+          <span>${t("groupRegistered")}</span>
+          ${idolGroups.map((item) => `
+            <button class="${state.selectedIdolGroup === item.id ? "selected" : ""}" data-idol-group="${item.id}">
+              ${item.name}<small>${idolStatus(item) ? `${idolStatus(item)} · ` : ""}${item.type.toUpperCase()} · ${idolTags(item).join(" · ")}</small>
+            </button>
+          `).join("")}
+        </div>
+        <div class="option-group">
+          <span>최애 포지션 / 推しポジション</span>
+          ${biasStyles.map((style) => `
+            <button class="${state.selectedBiasStyle === style.id ? "selected" : ""}" data-bias-style="${style.id}">
+              ${biasStyleLabel(style.id)}<small>${biasStyleDetail(style.id)}</small>
+            </button>
+          `).join("")}
+        </div>
+      ` : ""}
+      ${tab === "frame" ? `
+        <div class="frame-picker">
+          ${frames.map((frame) => `
+            <button class="${state.selectedFrame === frame.id ? "selected" : ""}" data-frame="${frame.id}">
+              <span class="frame-dot ${frame.id}"></span>${frameLabel(frame.id)}
+            </button>
+          `).join("")}
+        </div>
+      ` : ""}
       <button class="primary full" data-action="back-lobby">${t("save")}</button>
     </section>
   `);
@@ -847,17 +952,19 @@ function roomCreateView() {
       <div class="room-preview">
         <span>ROOM ${state.roomCode}</span>
         <strong>${themeLabel(state.selectedTheme)}</strong>
-        <p>${selectedPack().name} ${t("packSuffix")} · ${state.playerCount}${t("playersSuffix")} · ${t("inviteLink")}</p>
+        <p>${themeVibe(state.selectedTheme)}</p>
       </div>
       <div class="count-row">
-        ${[4, 5, 6].map((count) => `
+        ${settings.playerCounts.map((count) => `
           <button class="${state.playerCount === count ? "active" : ""}" data-count="${count}">${count}${t("playersSuffix")}</button>
         `).join("")}
       </div>
       <div class="option-group">
         <span>${t("roomTheme")}</span>
         ${themes.map((theme) => `
-          <button class="${state.selectedTheme === theme ? "selected" : ""}" data-theme="${theme}">${themeLabel(theme)}</button>
+          <button class="${state.selectedTheme === themeId(theme) ? "selected" : ""}" data-theme="${themeId(theme)}">
+            ${themeLabel(themeId(theme))}<small>${themeVibe(themeId(theme))}</small>
+          </button>
         `).join("")}
       </div>
       <div class="option-group">
@@ -898,9 +1005,9 @@ function joinRoomView() {
   `);
 }
 
-function mvpOverview() {
-  return `
-    <section class="panel rule-panel">
+function guideView() {
+  shell(`
+    <section class="panel rule-panel compact-page">
       <div class="section-head">
         <span>How To Play</span>
         <strong>${t("howToPlay")}</strong>
@@ -910,38 +1017,87 @@ function mvpOverview() {
         <article><span>2</span><p>${t("rule2")}</p></article>
         <article><span>3</span><p>${t("rule3")}</p></article>
       </div>
+      <button class="primary full" data-action="room-create">${t("createRoom")}</button>
+      <button class="text-button" data-action="back-lobby">${t("backHome")}</button>
     </section>
-    <section class="mvp-grid">
-      <article>
-        <span>Flow</span>
-        <strong>${t("coreLoop")}</strong>
-      </article>
-      <article>
-        <span>Play With</span>
-        <strong>${t("target")}</strong>
-      </article>
-    </section>
-  `;
+  `);
 }
 
-function packPreview() {
-  return `
-    <section class="panel pack-panel">
+function packsView() {
+  shell(`
+    <section class="panel pack-panel compact-page">
       <div class="section-head">
         <span>Question Packs</span>
-        <strong>${t("packsTitle")}</strong>
+        <strong>${t("pickPack")}</strong>
       </div>
       ${localizedPacks().map((pack) => `
-        <article class="pack-card">
+        <button class="pack-card ${state.selectedPack === pack.name || state.selectedPack === pack.baseName || state.selectedPack === pack.id ? "selected" : ""}" data-pack="${pack.id}">
           <div>
             <strong>${pack.name}</strong>
-            <p>${pack.tone}</p>
+            <p>${pack.rounds.length}${t("problem")} · ${pack.tone}</p>
           </div>
           <span>${pack.status}</span>
-        </article>
+        </button>
       `).join("")}
+      <button class="primary full" data-action="room-create">${t("createRoom")}</button>
+      <button class="text-button" data-action="back-lobby">${t("backHome")}</button>
     </section>
-  `;
+  `);
+}
+
+function newsView() {
+  shell(`
+    <section class="panel compact-page">
+      <div class="section-head">
+        <span>News</span>
+        <strong>${t("news")}</strong>
+      </div>
+      <div class="notice-list">
+        ${notices.map(localizedNotice).map((notice) => `
+          <article>
+            <span>${notice.date}</span>
+            <strong>${notice.title}</strong>
+            <p>${notice.body}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="section-head">
+        <span>Artists</span>
+        <strong>${t("artistRegistry")}</strong>
+      </div>
+      <div class="registry-list">
+        ${idolGroups.map((group) => `
+          <article class="${group.owned ? "owned" : ""}">
+            <strong>${group.name}</strong>
+            <span>${idolStatus(group) || t("statusJoined")}</span>
+            <p>${idolTags(group).join(" · ")}</p>
+          </article>
+        `).join("")}
+      </div>
+      <button class="text-button" data-action="back-lobby">${t("backHome")}</button>
+    </section>
+  `);
+}
+
+function settingsView() {
+  shell(`
+    <section class="panel compact-page">
+      <div class="section-head">
+        <span>Settings</span>
+        <strong>${t("settings")}</strong>
+      </div>
+      ${languageSelectMarkup(state.lang, "data-app-lang", t("appLanguage"))}
+      <div class="option-group">
+        <span>${t("roomTheme")}</span>
+        ${themes.map((theme) => `
+          <button class="${state.selectedTheme === themeId(theme) ? "selected" : ""}" data-theme="${themeId(theme)}">
+            ${themeLabel(themeId(theme))}<small>${themeVibe(themeId(theme))}</small>
+          </button>
+        `).join("")}
+      </div>
+      <button class="primary full" data-action="back-lobby">${t("save")}</button>
+    </section>
+  `);
 }
 
 function partyReadyView() {
@@ -951,7 +1107,7 @@ function partyReadyView() {
       <h2>${t("partyTitle")}</h2>
       <p>${t("partyBody")}</p>
       <div class="count-row">
-        ${[4, 5, 6].map((count) => `
+        ${settings.playerCounts.map((count) => `
           <button class="${state.playerCount === count ? "active" : ""}" data-count="${count}">${count}${t("playersSuffix")}</button>
         `).join("")}
       </div>
@@ -1277,6 +1433,10 @@ function render() {
   if (state.phase === "joinRoom") joinRoomView();
   if (state.phase === "profile") profileView();
   if (state.phase === "roomCreate") roomCreateView();
+  if (state.phase === "guide") guideView();
+  if (state.phase === "packs") packsView();
+  if (state.phase === "news") newsView();
+  if (state.phase === "settings") settingsView();
   if (state.phase === "partyReady") partyReadyView();
   if (state.phase === "solo") soloView();
   if (state.phase === "soloResult") soloResultView();
@@ -1314,6 +1474,22 @@ app.addEventListener("click", (event) => {
   }
   if (button.dataset.action === "profile") {
     state.phase = "profile";
+    render();
+  }
+  if (button.dataset.action === "guide") {
+    state.phase = "guide";
+    render();
+  }
+  if (button.dataset.action === "packs") {
+    state.phase = "packs";
+    render();
+  }
+  if (button.dataset.action === "news") {
+    state.phase = "news";
+    render();
+  }
+  if (button.dataset.action === "settings") {
+    state.phase = "settings";
     render();
   }
   if (button.dataset.action === "room-create") {
@@ -1364,8 +1540,12 @@ app.addEventListener("click", (event) => {
     saveSettings();
     render();
   }
+  if (button.dataset.profileTab !== undefined && settings.profileTabs.includes(button.dataset.profileTab)) {
+    state.profileTab = button.dataset.profileTab;
+    render();
+  }
   if (button.dataset.dressType !== undefined && button.dataset.dressId !== undefined) {
-    const stateKey = `selected${button.dataset.dressType[0].toUpperCase()}${button.dataset.dressType.slice(1)}`;
+    const stateKey = selectedDressKey(button.dataset.dressType);
     if (dressOptions(button.dataset.dressType).some((item) => item.id === button.dataset.dressId)) {
       state[stateKey] = button.dataset.dressId;
       saveSettings();

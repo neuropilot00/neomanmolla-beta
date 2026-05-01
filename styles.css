@@ -52,6 +52,23 @@ button {
   padding: 2px 2px 10px;
 }
 
+.top-actions {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.settings-button {
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
 .eyebrow {
   margin: 0 0 4px;
   color: var(--mint);
@@ -217,6 +234,43 @@ p {
   gap: 8px;
 }
 
+.main-menu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.main-menu .primary {
+  grid-column: 1 / -1;
+}
+
+.tab-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.tab-row button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.tab-row button.selected {
+  border-color: rgba(184, 243, 95, 0.62);
+  color: #111;
+  background: var(--lime);
+}
+
+.compact-page {
+  min-height: calc(100vh - 90px);
+  align-content: start;
+}
+
 .mvp-grid,
 .metric-row,
 .rule-steps,
@@ -325,6 +379,13 @@ p {
   align-items: center;
   padding: 12px;
   box-shadow: none;
+  color: var(--ink);
+  text-align: left;
+}
+
+.pack-card.selected {
+  border-color: rgba(184, 243, 95, 0.8);
+  background: rgba(184, 243, 95, 0.12);
 }
 
 .pack-card p {
@@ -698,6 +759,44 @@ p {
   font-size: 0.78rem;
   line-height: 1.35;
   overflow-wrap: anywhere;
+}
+
+.notice-list,
+.registry-list {
+  display: grid;
+  gap: 8px;
+}
+
+.notice-list article,
+.registry-list article {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.notice-list span,
+.registry-list span {
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 950;
+}
+
+.notice-list strong,
+.registry-list strong {
+  display: block;
+  margin-top: 3px;
+}
+
+.notice-list p,
+.registry-list p {
+  margin-top: 4px;
+  font-size: 0.78rem;
+}
+
+.registry-list article.owned {
+  border-color: rgba(184, 243, 95, 0.56);
+  background: rgba(184, 243, 95, 0.1);
 }
 
 .count-row {
