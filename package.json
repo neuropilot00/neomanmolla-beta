@@ -1,0 +1,14 @@
+{
+  "name": "neomanmolla-beta",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Mobile social deduction beta with a lightweight Railway API.",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server/index.js",
+    "check": "node --check app.js && node --check game-data.js && node --check server/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

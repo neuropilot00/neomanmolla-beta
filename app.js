@@ -129,6 +129,12 @@ const COPY = {
     answerRequired: "짧게라도 답변을 적어야 다음으로 넘어가요",
     resultHit: "맞혔다",
     resultMiss: "속았다",
+    apiServer: "Railway API URL",
+    connectServer: "서버 연결 확인",
+    serverConnected: "서버 연결 성공",
+    serverFailed: "서버 연결 실패",
+    createOnlineRoom: "서버 방 생성",
+    onlineRoomCreated: "서버 방을 만들었습니다",
   },
   ja: {
     eyebrow: "4-6人リアルタイム推理",
@@ -256,6 +262,12 @@ const COPY = {
     answerRequired: "短くても答えを入力すると次へ進めます",
     resultHit: "当てた",
     resultMiss: "騙された",
+    apiServer: "Railway API URL",
+    connectServer: "サーバー接続確認",
+    serverConnected: "サーバー接続成功",
+    serverFailed: "サーバー接続失敗",
+    createOnlineRoom: "サーバールーム作成",
+    onlineRoomCreated: "サーバールームを作成しました",
   },
 };
 
@@ -297,6 +309,7 @@ const state = {
   lang: "ko",
   customNames: [...playerNames],
   playerLangs: [...settings.defaultPlayerLangs],
+  apiBaseUrl: "",
   currentAnswer: "",
   toast: "",
   heroTouchedAt: 0,
@@ -575,6 +588,7 @@ function saveSettings() {
       selectedTheme: state.selectedTheme,
       customNames: state.customNames,
       playerLangs: state.playerLangs,
+      apiBaseUrl: state.apiBaseUrl,
       lang: state.lang,
     }),
   );
@@ -600,6 +614,7 @@ function loadSettings() {
     if (Array.isArray(saved.customNames)) state.customNames = playerNameList().map((name, index) => cleanText(saved.customNames[index], name));
     else state.customNames = [...playerNameList()];
     if (Array.isArray(saved.playerLangs)) state.playerLangs = playerNames.map((_, index) => supportedLang(saved.playerLangs[index]) ? saved.playerLangs[index] : state.playerLangs[index]);
+    if (typeof saved.apiBaseUrl === "string") state.apiBaseUrl = saved.apiBaseUrl;
   } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
@@ -608,6 +623,8 @@ function loadSettings() {
 function applyUrlRoom() {
   const params = new URLSearchParams(window.location.search);
   const room = params.get("room");
+  const api = params.get("api");
+  if (api) state.apiBaseUrl = api;
   if (!room) return;
 
   state.roomCode = room;
@@ -648,6 +665,65 @@ function betaStats() {
   return JSON.parse(localStorage.getItem(EVENTS_KEY) || "{}");
 }
 
+function normalizedApiBase() {
+  return state.apiBaseUrl.trim().replace(/\/+$/, "");
+}
+
+function apiEnabled() {
+  return /^https?:\/\//.test(normalizedApiBase());
+}
+
+async function apiRequest(path, options = {}) {
+  if (!apiEnabled()) throw new Error("missing_api_base");
+  const response = await fetch(`${normalizedApiBase()}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || data.error || "api_error");
+  return data;
+}
+
+async function checkServerConnection() {
+  try {
+    await apiRequest("/health");
+    state.toast = t("serverConnected");
+  } catch {
+    state.toast = t("serverFailed");
+  }
+  saveSettings();
+  render();
+}
+
+async function createOnlineRoom() {
+  try {
+    const room = await apiRequest("/api/rooms", {
+      method: "POST",
+      body: JSON.stringify({
+        playerCount: state.playerCount,
+        packId: packId(selectedBasePack()),
+        questionThemeId: selectedQuestionTheme()?.id || "all",
+        themeId: state.selectedTheme,
+        playerLangs: state.playerLangs.slice(0, state.playerCount),
+        players: players().map((player) => ({
+          name: player.name,
+          avatarIndex: player.index,
+        })),
+      }),
+    });
+    state.roomCode = room.code;
+    state.toast = t("onlineRoomCreated");
+    track("onlineRoomCreate");
+  } catch {
+    state.toast = t("serverFailed");
+  }
+  saveSettings();
+  render();
+}
+
 function roomInviteUrl() {
   const url = new URL(window.location.href);
   url.search = "";
@@ -659,6 +735,7 @@ function roomInviteUrl() {
   url.searchParams.set("players", String(state.playerCount));
   url.searchParams.set("lang", state.lang);
   url.searchParams.set("pl", state.playerLangs.slice(0, state.playerCount).join(""));
+  if (apiEnabled()) url.searchParams.set("api", normalizedApiBase());
   return url.toString();
 }
 
@@ -1131,6 +1208,13 @@ function roomCreateView() {
         <span>${t("inviteLink")}</span>
         <p>${roomInviteUrl()}</p>
       </div>
+      <div class="server-box">
+        <label>
+          <span>${t("apiServer")}</span>
+          <input data-api-base="true" value="${state.apiBaseUrl}" placeholder="https://your-service.up.railway.app" />
+        </label>
+        <button class="secondary full" data-action="server-room">${t("createOnlineRoom")}</button>
+      </div>
       <button class="primary full" data-action="copy-invite">${t("copyInvite")}</button>
       <button class="secondary full" data-action="party-ready">${t("localDemo")}</button>
       <button class="text-button" data-action="back-lobby">${t("backHome")}</button>
@@ -1250,6 +1334,11 @@ function settingsView() {
         <strong>${t("settings")}</strong>
       </div>
       ${languageSelectMarkup(state.lang, "data-app-lang", t("appLanguage"))}
+      <label class="server-field">
+        <span>${t("apiServer")}</span>
+        <input data-api-base="true" value="${state.apiBaseUrl}" placeholder="https://your-service.up.railway.app" />
+      </label>
+      <button class="secondary full" data-action="check-server">${t("connectServer")}</button>
       <div class="option-group">
         <span>${t("roomTheme")}</span>
         ${themes.map((theme) => `
@@ -1612,7 +1701,7 @@ function render() {
   if (state.phase === "result") resultView();
 }
 
-app.addEventListener("click", (event) => {
+app.addEventListener("click", async (event) => {
   const button = event.target.closest("button");
   if (!button) return;
 
@@ -1654,6 +1743,12 @@ app.addEventListener("click", (event) => {
   if (button.dataset.action === "settings") {
     state.phase = "settings";
     render();
+  }
+  if (button.dataset.action === "check-server") {
+    await checkServerConnection();
+  }
+  if (button.dataset.action === "server-room") {
+    await createOnlineRoom();
   }
   if (button.dataset.action === "back") {
     goBack();
@@ -1751,6 +1846,10 @@ app.addEventListener("input", (event) => {
   }
   if (input.dataset.answerInput) {
     state.currentAnswer = input.value;
+  }
+  if (input.dataset.apiBase) {
+    state.apiBaseUrl = input.value.trim();
+    saveSettings();
   }
 });
 

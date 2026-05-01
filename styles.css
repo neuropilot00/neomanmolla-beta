@@ -878,6 +878,45 @@ p {
   overflow-wrap: anywhere;
 }
 
+.server-box,
+.server-field {
+  display: grid;
+  gap: 8px;
+}
+
+.server-box {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.server-box label,
+.server-field {
+  display: grid;
+  gap: 5px;
+}
+
+.server-box span,
+.server-field span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.server-box input,
+.server-field input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: rgba(12, 13, 16, 0.8);
+  font: inherit;
+  font-size: 0.78rem;
+}
+
 .notice-list,
 .registry-list {
   display: grid;

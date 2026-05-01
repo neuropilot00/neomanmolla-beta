@@ -6,7 +6,15 @@
 
 ## 실행
 
-`index.html`을 브라우저로 열면 바로 실행됩니다.
+정적 베타는 `index.html`을 브라우저로 열면 바로 실행됩니다.
+
+Railway 서버 베타는 아래처럼 실행합니다.
+
+```bash
+npm start
+```
+
+배포 후 Railway에서 받은 URL을 앱의 `설정 > Railway API URL`에 넣으면 방 만들기 화면에서 서버 방을 생성할 수 있습니다.
 
 ## 현재 구현
 
@@ -40,6 +48,8 @@
 - 결과 카드
 - 결과/초대 복사
 - 모바일 우선 UI
+- Railway용 Node API 서버
+- 서버 방 생성/조회/참가/시작/답변/투표 API
 
 ## 베타 테스트 방법
 
@@ -53,6 +63,23 @@
 K-pop 그룹 데이터는 내부 테스트용 큐레이션입니다. 정식 공개 전에는 권리/표기/업데이트 정책을 별도 확정해야 합니다.
 
 현재 버전은 정적 베타라 실시간 멀티 동기화는 없습니다. 실제 방 동기화는 다음 단계에서 Supabase 또는 Firebase로 연결합니다.
+
+## Railway API
+
+현재 API는 외부 의존성 없이 Node 기본 `http` 모듈로 동작합니다. 같은 저장소를 Railway에 연결하고 `npm start`를 실행하면 됩니다.
+
+주요 엔드포인트:
+
+- `GET /health`
+- `GET /api/content`
+- `POST /api/rooms`
+- `GET /api/rooms/:code`
+- `POST /api/rooms/:code/join`
+- `POST /api/rooms/:code/start`
+- `POST /api/rooms/:code/answers`
+- `POST /api/rooms/:code/votes`
+
+아직 Socket.IO 실시간 푸시는 붙이지 않았고, 서버 방 상태를 API로 저장/조회하는 1차 베타입니다.
 
 ## 확인할 점
 
