@@ -1035,7 +1035,7 @@ function fullBodyAvatarMarkup() {
       </div>
     `;
   }
-  const layers = ["body", "pants", "shoes", "top", "hair", "lips", "beauty", "accessory", "item"]
+  const layers = ["body", "pants", "shoes", "top", "hair", "item"]
     .map((type) => ({ type, item: dressOption(type, state[selectedDressKey(type)]) }))
     .filter(({ item }) => item?.asset);
   return `

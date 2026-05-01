@@ -195,6 +195,7 @@ window.NEOMANMOLLA_DATA = {
       { id: "void-mark", label: "V01D 마크", symbol: "V", rarity: "SSR" },
     ],
     item: [
+      { id: "none", label: "없음", symbol: "-", rarity: "N" },
       { id: "lightstick", label: "응원봉", symbol: "✦", rarity: "N", asset: "./assets/avatar/item-lightstick.png", thumb: "./assets/avatar/thumbs/item-lightstick.png" },
       { id: "mic", label: "마이크", symbol: "♪", rarity: "R", asset: "./assets/avatar/item-mic.png", thumb: "./assets/avatar/thumbs/item-mic.png" },
       { id: "photocard", label: "포카", symbol: "▣", rarity: "R", asset: "./assets/avatar/item-photocard.png", thumb: "./assets/avatar/thumbs/item-photocard.png" },
