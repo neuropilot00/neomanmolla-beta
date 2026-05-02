@@ -2,6 +2,7 @@ const gameData = window.NEOMANMOLLA_DATA;
 const { avatars, biasStyles, characterSets, dressUp, frames, heroSlides, idolGroups, notices, packs, playerNames, settings, themes } = gameData;
 const STORAGE_KEY = "neomanmolla-beta-state";
 const EVENTS_KEY = "neomanmolla-beta-events";
+const ASSET_TUNING_KEY = "neomanmolla-beta-asset-tuning";
 const DEFAULT_API_BASE_URL = "https://neomanmolla-beta-production.up.railway.app";
 const COPY = {
   ko: {
@@ -378,6 +379,8 @@ const state = {
   selectedAudiencePreset: settings.audiencePresets[0].id,
   profileTab: settings.profileTabs[0],
   activeDressCategory: "preset",
+  activeTuneType: "hair",
+  assetTuning: {},
   lang: "ko",
   customNames: [...playerNames],
   playerLangs: [...settings.defaultPlayerLangs],
@@ -586,6 +589,44 @@ function profileDressOptions(type) {
   return allowed.map((id) => options.find((item) => item.id === id)).filter(Boolean);
 }
 
+const ASSET_LAYER_DEFAULTS = {
+  body: { x: 0, y: 0, scale: 1, z: 10 },
+  pants: { x: 0, y: 0, scale: 1, z: 20 },
+  shoes: { x: 0, y: 0, scale: 1, z: 30 },
+  top: { x: 0, y: 0, scale: 1, z: 40 },
+  hair: { x: 0, y: 0, scale: 1, z: 50 },
+  item: { x: 0, y: 0, scale: 1, z: 60 },
+};
+
+const TUNABLE_ASSET_TYPES = ["body", "pants", "shoes", "top", "hair", "item"];
+
+function assetTuningId(type, id = state[selectedDressKey(type)]) {
+  return `${type}:${id}`;
+}
+
+function assetTuning(type, id = state[selectedDressKey(type)]) {
+  const defaults = ASSET_LAYER_DEFAULTS[type] || { x: 0, y: 0, scale: 1, z: 40 };
+  return { ...defaults, ...(state.assetTuning[assetTuningId(type, id)] || {}) };
+}
+
+function saveAssetTuning() {
+  localStorage.setItem(ASSET_TUNING_KEY, JSON.stringify(state.assetTuning));
+}
+
+function loadAssetTuning() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ASSET_TUNING_KEY) || "{}");
+    if (saved && typeof saved === "object") state.assetTuning = saved;
+  } catch {
+    localStorage.removeItem(ASSET_TUNING_KEY);
+  }
+}
+
+function assetLayerStyle(type, id) {
+  const tune = assetTuning(type, id);
+  return `transform:translate(${tune.x}px, ${tune.y}px) scale(${tune.scale});z-index:${tune.z};`;
+}
+
 function dressOption(type, id) {
   const options = dressOptions(type);
   return options.find((item) => item.id === id) || options[0] || {};
@@ -677,7 +718,8 @@ function generateRoomCode() {
 }
 
 function saveSettings() {
-  const dress = Object.fromEntries(settings.profileCategories.map((type) => [type, state[selectedDressKey(type)]]));
+  const savedDressTypes = [...new Set([...settings.profileCategories, "body"])];
+  const dress = Object.fromEntries(savedDressTypes.map((type) => [type, state[selectedDressKey(type)]]));
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify({
@@ -708,7 +750,7 @@ function loadSettings() {
     if (Number.isInteger(saved.selectedAvatar)) state.selectedAvatar = saved.selectedAvatar;
     if (settings.characterPoses.some((pose) => pose.id === saved.selectedPose)) state.selectedPose = saved.selectedPose;
     if (biasStyles.some((style) => style.id === saved.selectedBiasStyle)) state.selectedBiasStyle = saved.selectedBiasStyle;
-    settings.profileCategories.forEach((type) => {
+    [...new Set([...settings.profileCategories, "body"])].forEach((type) => {
       const stateKey = selectedDressKey(type);
       const savedId = saved.dress?.[type] || saved[stateKey];
       if (dressOptions(type).some((item) => item.id === savedId)) state[stateKey] = savedId;
@@ -1050,7 +1092,7 @@ function fullBodyAvatarMarkup() {
       </div>
     `;
   }
-  const layers = ["body", "pants", "shoes", "top", "hair", "item"]
+  const layers = TUNABLE_ASSET_TYPES
     .map((type) => ({ type, item: dressOption(type, state[selectedDressKey(type)]) }))
     .filter(({ item }) => item?.asset);
   return `
@@ -1059,7 +1101,7 @@ function fullBodyAvatarMarkup() {
       <span class="stage-aura"></span>
       <span class="asset-character">
         <i class="asset-shadow"></i>
-        ${layers.map(({ type, item }) => `<img class="asset-layer asset-${type}" src="${item.asset}" alt="" />`).join("")}
+        ${layers.map(({ type, item }) => `<img class="asset-layer asset-${type}" style="${assetLayerStyle(type, item.id)}" src="${item.asset}" alt="" />`).join("")}
       </span>
     </div>
   `;
@@ -1269,7 +1311,7 @@ function setLanguage(lang) {
 
 function shell(content) {
   const soloClass = state.phase.startsWith("solo") ? " solo-mode" : "";
-  const showRoomCode = !["lobby", "guide", "packs", "news", "settings", "profile"].includes(state.phase);
+  const showRoomCode = !["lobby", "guide", "packs", "news", "settings", "profile", "assetEditor"].includes(state.phase);
   const showBack = state.phase !== "lobby";
   app.innerHTML = `
     <section class="phone${soloClass}">
@@ -1298,6 +1340,8 @@ function shell(content) {
 function goBack() {
   if (state.phase === "partyReady") {
     state.phase = "roomCreate";
+  } else if (state.phase === "assetEditor") {
+    state.phase = "profile";
   } else {
     state.phase = "lobby";
     state.mode = "party";
@@ -1481,7 +1525,59 @@ function profileView() {
           `).join("")}
         </div>
       ` : ""}
+      <button class="secondary full" data-action="asset-editor">파츠 좌표 조정</button>
       <button class="primary full" data-action="save-profile">${t("save")}</button>
+    </section>
+  `);
+}
+
+function assetEditorView() {
+  const tuneType = TUNABLE_ASSET_TYPES.includes(state.activeTuneType) ? state.activeTuneType : "hair";
+  const selectedId = state[selectedDressKey(tuneType)];
+  const selectedItem = dressOption(tuneType, selectedId);
+  const tune = assetTuning(tuneType, selectedId);
+  const tuningJson = JSON.stringify(state.assetTuning, null, 2);
+  shell(`
+    <section class="panel asset-editor-panel">
+      <div class="section-head">
+        <span>Asset Editor</span>
+        <strong>파츠 좌표 조정</strong>
+      </div>
+      <div class="asset-editor-layout">
+        <div class="asset-editor-preview profile-preview ${state.selectedFrame}">
+          ${fullBodyAvatarMarkup()}
+        </div>
+        <div class="asset-editor-controls">
+          <div class="closet-tabs compact-tabs">
+            <span>조정할 파츠</span>
+            <div>
+              ${TUNABLE_ASSET_TYPES.map((type) => `
+                <button class="${tuneType === type ? "selected" : ""}" data-tune-type="${type}">${t(type)}</button>
+              `).join("")}
+            </div>
+          </div>
+          <div class="option-group asset-editor-options">
+            <span>${t(tuneType)}</span>
+            ${profileDressOptions(tuneType).map((item) => `
+              <button class="${selectedId === item.id ? "selected" : ""} ${rarityClass(item)}" data-dress-type="${tuneType}" data-dress-id="${item.id}">
+                ${dressLabel(tuneType, item.id)}<small>${item.id}</small>
+              </button>
+            `).join("")}
+          </div>
+          <div class="tuning-card">
+            <strong>${dressLabel(tuneType, selectedId)}</strong>
+            <label>X <input type="range" min="-80" max="80" step="1" value="${tune.x}" data-asset-tune="${tuneType}:${selectedId}:x" /><b>${tune.x}</b></label>
+            <label>Y <input type="range" min="-80" max="80" step="1" value="${tune.y}" data-asset-tune="${tuneType}:${selectedId}:y" /><b>${tune.y}</b></label>
+            <label>Scale <input type="range" min="0.7" max="1.3" step="0.01" value="${tune.scale}" data-asset-tune="${tuneType}:${selectedId}:scale" /><b>${tune.scale.toFixed(2)}</b></label>
+            <label>Z <input type="range" min="0" max="100" step="1" value="${tune.z}" data-asset-tune="${tuneType}:${selectedId}:z" /><b>${tune.z}</b></label>
+          </div>
+          <div class="asset-editor-actions">
+            <button class="secondary" data-action="reset-asset-tune">현재 파츠 초기화</button>
+            <button class="primary" data-action="profile">프로필로 돌아가기</button>
+          </div>
+          <textarea class="tuning-json" readonly>${tuningJson}</textarea>
+        </div>
+      </div>
     </section>
   `);
 }
@@ -2104,6 +2200,7 @@ function render() {
   if (state.phase === "lobby") lobbyView();
   if (state.phase === "joinRoom") joinRoomView();
   if (state.phase === "profile") profileView();
+  if (state.phase === "assetEditor") assetEditorView();
   if (state.phase === "roomCreate") roomCreateView();
   if (state.phase === "guide") guideView();
   if (state.phase === "packs") packsView();
@@ -2169,6 +2266,16 @@ app.addEventListener("click", async (event) => {
   }
   if (button.dataset.action === "settings") {
     state.phase = "settings";
+    render();
+  }
+  if (button.dataset.action === "asset-editor") {
+    state.phase = "assetEditor";
+    render();
+  }
+  if (button.dataset.action === "reset-asset-tune") {
+    const type = TUNABLE_ASSET_TYPES.includes(state.activeTuneType) ? state.activeTuneType : "hair";
+    delete state.assetTuning[assetTuningId(type)];
+    saveAssetTuning();
     render();
   }
   if (button.dataset.action === "back") {
@@ -2239,6 +2346,10 @@ app.addEventListener("click", async (event) => {
     state.profileTab = button.dataset.profileTab;
     render();
   }
+  if (button.dataset.tuneType !== undefined && TUNABLE_ASSET_TYPES.includes(button.dataset.tuneType)) {
+    state.activeTuneType = button.dataset.tuneType;
+    render();
+  }
   if (button.dataset.dressCategory !== undefined && settings.profileCategories.includes(button.dataset.dressCategory)) {
     state.activeDressCategory = button.dataset.dressCategory;
     saveSettings();
@@ -2286,6 +2397,21 @@ app.addEventListener("input", (event) => {
   if (input.dataset.onlineName) {
     state.onlineName = cleanText(input.value, state.customNames[0]);
   }
+  if (input.dataset.assetTune) {
+    const [type, id, key] = input.dataset.assetTune.split(":");
+    if (TUNABLE_ASSET_TYPES.includes(type) && ["x", "y", "scale", "z"].includes(key)) {
+      const tuneId = assetTuningId(type, id);
+      const current = assetTuning(type, id);
+      const value = key === "scale" ? Number(input.value) : Math.round(Number(input.value));
+      state.assetTuning[tuneId] = { ...current, [key]: value };
+      saveAssetTuning();
+      app.querySelectorAll(`.asset-${type}`).forEach((layer) => {
+        layer.setAttribute("style", assetLayerStyle(type, id));
+      });
+      const valueLabel = input.parentElement?.querySelector("b");
+      if (valueLabel) valueLabel.textContent = key === "scale" ? value.toFixed(2) : String(value);
+    }
+  }
 });
 
 app.addEventListener("change", (event) => {
@@ -2300,6 +2426,7 @@ app.addEventListener("change", (event) => {
   }
 });
 
+loadAssetTuning();
 loadSettings();
 applyUrlRoom();
 render();
