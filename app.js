@@ -368,7 +368,7 @@ const state = {
   selectedShoes: dressUp.shoes[1].id,
   selectedOutfit: dressUp.outfit[0].id,
   selectedHat: dressUp.hat[0].id,
-  selectedFace: dressUp.face[0].id,
+  selectedFace: "base-m",
   selectedItem: "none",
   selectedBack: dressUp.back[0].id,
   selectedAura: dressUp.aura[0].id,
@@ -591,14 +591,15 @@ function profileDressOptions(type) {
 
 const ASSET_LAYER_DEFAULTS = {
   body: { x: 0, y: 0, scale: 1, z: 10 },
-  pants: { x: 0, y: 0, scale: 1, z: 20 },
-  shoes: { x: 0, y: 0, scale: 1, z: 30 },
+  shoes: { x: 0, y: 0, scale: 1, z: 20 },
+  pants: { x: 0, y: 0, scale: 1, z: 30 },
   top: { x: 0, y: 0, scale: 1, z: 40 },
-  hair: { x: 0, y: 0, scale: 1, z: 50 },
-  item: { x: 0, y: 0, scale: 1, z: 60 },
+  face: { x: 0, y: 0, scale: 1, z: 50 },
+  hair: { x: 0, y: 0, scale: 1, z: 70 },
+  item: { x: 0, y: 0, scale: 1, z: 80 },
 };
 
-const TUNABLE_ASSET_TYPES = ["body", "pants", "shoes", "top", "hair", "item"];
+const TUNABLE_ASSET_TYPES = ["body", "shoes", "pants", "top", "face", "hair", "item"];
 
 function assetTuningId(type, id = state[selectedDressKey(type)]) {
   return `${type}:${id}`;
@@ -718,7 +719,7 @@ function generateRoomCode() {
 }
 
 function saveSettings() {
-  const savedDressTypes = [...new Set([...settings.profileCategories, "body"])];
+  const savedDressTypes = [...new Set([...settings.profileCategories, ...TUNABLE_ASSET_TYPES])];
   const dress = Object.fromEntries(savedDressTypes.map((type) => [type, state[selectedDressKey(type)]]));
   localStorage.setItem(
     STORAGE_KEY,
@@ -750,7 +751,7 @@ function loadSettings() {
     if (Number.isInteger(saved.selectedAvatar)) state.selectedAvatar = saved.selectedAvatar;
     if (settings.characterPoses.some((pose) => pose.id === saved.selectedPose)) state.selectedPose = saved.selectedPose;
     if (biasStyles.some((style) => style.id === saved.selectedBiasStyle)) state.selectedBiasStyle = saved.selectedBiasStyle;
-    [...new Set([...settings.profileCategories, "body"])].forEach((type) => {
+    [...new Set([...settings.profileCategories, ...TUNABLE_ASSET_TYPES])].forEach((type) => {
       const stateKey = selectedDressKey(type);
       const savedId = saved.dress?.[type] || saved[stateKey];
       if (dressOptions(type).some((item) => item.id === savedId)) state[stateKey] = savedId;

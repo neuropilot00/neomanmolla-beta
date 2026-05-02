@@ -13,6 +13,7 @@ DATA_PATH = ROOT / "game-data.js"
 CANVAS = 256
 TARGETS = {
     "body": (55, 18, 201, 238),
+    "face": (55, 18, 201, 238),
     "hair": (34, 12, 222, 122),
     "eyes": (90, 78, 166, 106),
     "lips": (108, 104, 148, 122),
@@ -26,6 +27,11 @@ TARGETS = {
 
 SHEETS = {
     "body": {
+        "file": "avatar-body-sheet.png",
+        "cols": 3,
+        "ids": ["base-m", "base-f", "warm", "cool", "tan", "porcelain"],
+    },
+    "face": {
         "file": "avatar-body-sheet.png",
         "cols": 3,
         "ids": ["base-m", "base-f", "warm", "cool", "tan", "porcelain"],
@@ -151,8 +157,19 @@ def remove_green(image):
     return rgba
 
 
-def remove_skin_from_clothing(image):
+def keep_head_only(image):
     rgba = image.convert("RGBA")
+    pixels = rgba.load()
+    for y in range(rgba.height):
+        for x in range(rgba.width):
+            if y > 122:
+                r, g, b, a = pixels[x, y]
+                pixels[x, y] = (r, g, b, 0)
+    return rgba
+
+
+def make_face_base(image):
+    rgba = keep_head_only(image)
     pixels = rgba.load()
     for y in range(rgba.height):
         for x in range(rgba.width):
@@ -160,15 +177,45 @@ def remove_skin_from_clothing(image):
             if a == 0:
                 continue
             is_skin = (
-                r > 145
-                and 72 < g < 220
-                and 35 < b < 185
-                and r > g + 18
-                and g > b + 10
-                and (r - b) > 48
+                r > 130
+                and 58 < g < 222
+                and 32 < b < 190
+                and r > g + 8
+                and g > b
+                and (r - b) > 36
             )
-            if is_skin:
+            if not is_skin:
                 pixels[x, y] = (r, g, b, 0)
+    return rgba
+
+
+def unify_pants_shape(image):
+    rgba = image.convert("RGBA")
+    bbox = rgba.getchannel("A").getbbox()
+    if bbox is None:
+        return rgba
+
+    pixels = rgba.load()
+    colors = []
+    for y in range(max(0, bbox[1]), min(rgba.height, bbox[3])):
+        for x in range(max(0, bbox[0]), min(rgba.width, bbox[2])):
+            r, g, b, a = pixels[x, y]
+            if a > 120:
+                colors.append((r, g, b, a))
+    if not colors:
+        return rgba
+
+    colors.sort(key=lambda c: c[3], reverse=True)
+    fill = colors[len(colors) // 3]
+    shade = tuple(max(0, int(v * 0.72)) for v in fill[:3]) + (fill[3],)
+    draw = ImageDraw.Draw(rgba)
+    waist_y = max(136, bbox[1])
+    hip_y = min(178, bbox[3])
+    left = max(72, bbox[0] - 10)
+    right = min(184, bbox[2] + 10)
+    draw.rounded_rectangle((left, waist_y, right, waist_y + 18), radius=6, fill=fill)
+    draw.rectangle((left + 8, waist_y + 14, right - 8, hip_y), fill=fill)
+    draw.line((left + 10, waist_y + 8, right - 10, waist_y + 8), fill=shade, width=2)
     return rgba
 
 
@@ -219,18 +266,18 @@ def manual_face_layer(kind, item_id):
         }
         dark, mid, shine = colors[item_id]
         if item_id == "sleepy":
-            draw_rect(draw, (94, 90, 116, 94), dark)
-            draw_rect(draw, (140, 90, 162, 94), dark)
-            draw_rect(draw, (97, 94, 114, 96), mid)
-            draw_rect(draw, (143, 94, 160, 96), mid)
+            draw_rect(draw, (94, 84, 116, 88), dark)
+            draw_rect(draw, (140, 84, 162, 88), dark)
+            draw_rect(draw, (97, 88, 114, 90), mid)
+            draw_rect(draw, (143, 88, 160, 90), mid)
         else:
-            for x in (96, 140):
-                draw_rect(draw, (x, 82, x + 19, 103), "#1b0f0b")
-                draw_rect(draw, (x + 3, 84, x + 16, 101), dark)
-                draw_rect(draw, (x + 6, 89, x + 14, 101), mid)
-                draw_rect(draw, (x + 5, 85, x + 9, 89), shine)
-            draw_rect(draw, (92, 78, 118, 81), "#1b0f0b")
-            draw_rect(draw, (138, 78, 164, 81), "#1b0f0b")
+            for x in (103, 143):
+                draw_rect(draw, (x, 79, x + 11, 92), "#1b0f0b")
+                draw_rect(draw, (x + 2, 81, x + 9, 91), dark)
+                draw_rect(draw, (x + 4, 85, x + 8, 91), mid)
+                draw_rect(draw, (x + 3, 81, x + 5, 83), shine)
+            draw_rect(draw, (99, 75, 116, 77), "#1b0f0b")
+            draw_rect(draw, (140, 75, 157, 77), "#1b0f0b")
     if kind == "lips":
         colors = {
             "natural": ("#d86a70", "#9f3c47"),
@@ -240,10 +287,10 @@ def manual_face_layer(kind, item_id):
             "dark": ("#7c1d2d", "#3c0710"),
         }
         main, shade = colors[item_id]
-        draw_rect(draw, (119, 112, 137, 115), main)
-        draw_rect(draw, (123, 116, 133, 118), shade)
+        draw_rect(draw, (123, 101, 133, 103), main)
+        draw_rect(draw, (125, 104, 131, 105), shade)
         if item_id == "gloss":
-            draw_rect(draw, (122, 112, 127, 113), "#ffe3ed")
+            draw_rect(draw, (124, 101, 127, 101), "#ffe3ed")
     return image
 
 
@@ -279,8 +326,10 @@ def extract_sheet(kind, config, assets):
             round((row + 1) * cell_h),
         ))
         out = fit_to_target(remove_green(crop), TARGETS[kind])
-        if kind == "top":
-            out = remove_skin_from_clothing(out)
+        if kind == "face":
+            out = keep_head_only(out)
+        if kind == "pants":
+            out = unify_pants_shape(out)
         save_layer(kind, item_id, out, assets)
 
 
