@@ -6,7 +6,7 @@ window.NEOMANMOLLA_DATA = {
     ],
     playerCounts: [4, 5, 6],
     defaultPlayerLangs: ["ko", "ja", "ko", "ja", "ko", "ja"],
-    profileCategories: ["preset", "body", "hair", "top", "pants", "shoes", "item", "back", "aura"],
+    profileCategories: ["preset", "hair", "top", "pants", "shoes", "item", "back", "aura"],
     profileTabs: ["parts", "artist", "frame"],
     characterPoses: [
       { id: "idle", label: "기본" },

@@ -355,20 +355,20 @@ const state = {
   selectedPose: settings.characterPoses[0].id,
   selectedFrame: frames[0].id,
   selectedBiasStyle: biasStyles[0].id,
-  selectedPreset: dressUp.preset[0].id,
+  selectedPreset: "custom",
   selectedBody: dressUp.body[0].id,
-  selectedHair: dressUp.hair[3].id,
+  selectedHair: "short",
   selectedEyes: dressUp.eyes[0].id,
   selectedLips: dressUp.lips[0].id,
   selectedBeauty: dressUp.beauty[0].id,
   selectedAccessory: dressUp.accessory[0].id,
-  selectedTop: dressUp.top[2].id,
+  selectedTop: "v01d-red",
   selectedPants: dressUp.pants[1].id,
   selectedShoes: dressUp.shoes[1].id,
   selectedOutfit: dressUp.outfit[0].id,
   selectedHat: dressUp.hat[0].id,
   selectedFace: dressUp.face[0].id,
-  selectedItem: dressUp.item[0].id,
+  selectedItem: "none",
   selectedBack: dressUp.back[0].id,
   selectedAura: dressUp.aura[0].id,
   selectedIdolGroup: idolGroups[0].id,
@@ -569,6 +569,21 @@ function localizedHeroSlide(slide) {
 
 function dressOptions(type) {
   return dressUp[type] || [];
+}
+
+const PROFILE_OPTION_LIMITS = {
+  hair: ["short", "wolf-black", "silver"],
+  top: ["v01d-red", "white-vocal", "street"],
+  pants: ["black-skinny", "denim-blue", "cargo"],
+  shoes: ["black-boots", "white-sneakers", "platform"],
+  item: ["none", "lightstick", "mic"],
+};
+
+function profileDressOptions(type) {
+  const options = dressOptions(type);
+  const allowed = PROFILE_OPTION_LIMITS[type];
+  if (!allowed) return options;
+  return allowed.map((id) => options.find((item) => item.id === id)).filter(Boolean);
 }
 
 function dressOption(type, id) {
@@ -1422,7 +1437,7 @@ function profileView() {
         <div class="closet-group">
           <span>${t(activeCategory)}</span>
           <div class="closet-grid">
-          ${dressOptions(activeCategory).map((item) => `
+          ${profileDressOptions(activeCategory).map((item) => `
             <button class="${state[selectedDressKey(activeCategory)] === item.id ? "selected" : ""} ${rarityClass(item)}" data-dress-type="${activeCategory}" data-dress-id="${item.id}">
               <b>${item.asset ? `<img src="${item.thumb || item.asset}" alt="" />` : item.symbol || item.label.slice(0, 1)}</b>
               <em>${dressLabel(activeCategory, item.id)}</em>
@@ -2231,7 +2246,7 @@ app.addEventListener("click", async (event) => {
   }
   if (button.dataset.dressType !== undefined && button.dataset.dressId !== undefined) {
     const stateKey = selectedDressKey(button.dataset.dressType);
-    if (dressOptions(button.dataset.dressType).some((item) => item.id === button.dataset.dressId)) {
+    if (profileDressOptions(button.dataset.dressType).some((item) => item.id === button.dataset.dressId)) {
       state[stateKey] = button.dataset.dressId;
       if (button.dataset.dressType !== "preset") state.selectedPreset = "custom";
       saveSettings();
