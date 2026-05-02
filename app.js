@@ -2,7 +2,7 @@ const gameData = window.NEOMANMOLLA_DATA;
 const { avatars, biasStyles, characterSets, dressUp, frames, heroSlides, idolGroups, notices, packs, playerNames, settings, themes } = gameData;
 const STORAGE_KEY = "neomanmolla-beta-state";
 const EVENTS_KEY = "neomanmolla-beta-events";
-const ASSET_TUNING_KEY = "neomanmolla-beta-asset-tuning";
+const ASSET_TUNING_KEY = "neomanmolla-beta-asset-tuning-v2";
 const DEFAULT_API_BASE_URL = "https://neomanmolla-beta-production.up.railway.app";
 const COPY = {
   ko: {
