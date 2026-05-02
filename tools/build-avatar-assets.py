@@ -151,6 +151,27 @@ def remove_green(image):
     return rgba
 
 
+def remove_skin_from_clothing(image):
+    rgba = image.convert("RGBA")
+    pixels = rgba.load()
+    for y in range(rgba.height):
+        for x in range(rgba.width):
+            r, g, b, a = pixels[x, y]
+            if a == 0:
+                continue
+            is_skin = (
+                r > 145
+                and 72 < g < 220
+                and 35 < b < 185
+                and r > g + 18
+                and g > b + 10
+                and (r - b) > 48
+            )
+            if is_skin:
+                pixels[x, y] = (r, g, b, 0)
+    return rgba
+
+
 def fit_to_target(image, target):
     bbox = image.getchannel("A").getbbox()
     canvas = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
@@ -258,6 +279,8 @@ def extract_sheet(kind, config, assets):
             round((row + 1) * cell_h),
         ))
         out = fit_to_target(remove_green(crop), TARGETS[kind])
+        if kind == "top":
+            out = remove_skin_from_clothing(out)
         save_layer(kind, item_id, out, assets)
 
 
