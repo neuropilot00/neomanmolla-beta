@@ -1447,6 +1447,7 @@ function profileView() {
       <div class="section-head">
         <span>My Profile</span>
         <strong>${t("profileTitle")}</strong>
+        <button class="section-tool-button" data-action="asset-editor">에셋 에디터</button>
       </div>
       <div class="profile-preview ${state.selectedFrame}">
         ${fullBodyAvatarMarkup()}
@@ -1525,7 +1526,6 @@ function profileView() {
           `).join("")}
         </div>
       ` : ""}
-      <button class="secondary full" data-action="asset-editor">파츠 좌표 조정</button>
       <button class="primary full" data-action="save-profile">${t("save")}</button>
     </section>
   `);

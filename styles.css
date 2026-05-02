@@ -779,10 +779,22 @@ p {
   justify-content: space-between;
   gap: 12px;
   align-items: end;
+  flex-wrap: wrap;
 }
 
 .section-head strong {
   font-size: 0.9rem;
+}
+
+.section-tool-button {
+  min-height: 34px;
+  border: 1px solid rgba(184, 243, 95, 0.44);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: #101114;
+  background: var(--lime);
+  font-size: 0.76rem;
+  font-weight: 950;
 }
 
 .pack-card {
