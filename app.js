@@ -826,6 +826,27 @@ function apiEnabled() {
   return true;
 }
 
+let socket = null;
+let socketRoom = null;
+
+function ensureSocket() {
+  if (socket) return socket;
+  if (typeof io !== "function") return null;
+  socket = io(normalizedApiBase(), { transports: ["websocket", "polling"] });
+  socket.on("room:state", (msg) => {
+    if (msg && msg.code === state.roomCode) fetchOnlineRoom(true);
+  });
+  return socket;
+}
+
+function joinSocketRoom() {
+  const s = ensureSocket();
+  if (!s || !state.roomCode) return;
+  if (socketRoom === state.roomCode) return;
+  socketRoom = state.roomCode;
+  s.emit("room:join", { code: state.roomCode, playerId: state.onlinePlayerId });
+}
+
 async function apiRequest(path, options = {}) {
   if (!apiEnabled()) throw new Error("missing_api_base");
   const response = await fetch(`${normalizedApiBase()}${path}`, {
@@ -909,6 +930,7 @@ function applyOnlineRoom(room, playerId = state.onlinePlayerId) {
   state.onlineRoom = room;
   state.onlinePlayerId = playerId || state.onlinePlayerId;
   state.roomCode = room.code;
+  joinSocketRoom();
   state.playerCount = room.playerCount;
   if (room.pack?.id) state.selectedPack = room.pack.id;
   if (room.theme?.id) state.selectedTheme = room.theme.id;
@@ -2218,7 +2240,8 @@ function render() {
   if (state.phase === "vote") voteView();
   if (state.phase === "result") resultView();
   if (state.phase === "onlineRoom") {
-    onlinePollTimer = setInterval(() => fetchOnlineRoom(true), 3000);
+    joinSocketRoom();
+    onlinePollTimer = setInterval(() => fetchOnlineRoom(true), 8000);
   }
   if (state.phase === "onlineRoom") onlineRoomView();
 }
