@@ -2,6 +2,7 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const { Server } = require("socket.io");
 
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = path.resolve(__dirname, "..");
@@ -49,14 +50,20 @@ async function initDatabase() {
 
 async function saveRoom(room) {
   rooms.set(room.code, room);
-  if (!dbReady) return;
-  await dbPool.query(
-    `INSERT INTO rooms (code, state, created_at, updated_at)
-     VALUES ($1, $2::jsonb, COALESCE($3::timestamptz, NOW()), NOW())
-     ON CONFLICT (code)
-     DO UPDATE SET state = EXCLUDED.state, updated_at = NOW()`,
-    [room.code, JSON.stringify(room), room.createdAt],
-  );
+  if (dbReady) {
+    await dbPool.query(
+      `INSERT INTO rooms (code, state, created_at, updated_at)
+       VALUES ($1, $2::jsonb, COALESCE($3::timestamptz, NOW()), NOW())
+       ON CONFLICT (code)
+       DO UPDATE SET state = EXCLUDED.state, updated_at = NOW()`,
+      [room.code, JSON.stringify(room), room.createdAt],
+    );
+  }
+  broadcastRoom(room);
+}
+
+function broadcastRoom(room) {
+  io.to("room:" + room.code).emit("room:state", { code: room.code, updatedAt: room.updatedAt });
 }
 
 async function getRoom(code) {
@@ -481,6 +488,16 @@ async function route(req, res) {
 const server = http.createServer((req, res) => {
   route(req, res).catch((error) => {
     send(res, 500, { error: "server_error", message: error.message });
+  });
+});
+
+const io = new Server(server, { cors: { origin: "*" } });
+io.on("connection", (socket) => {
+  socket.on("room:join", ({ code, playerId }) => {
+    if (!code) return;
+    socket.data.code = code;
+    socket.data.playerId = playerId || null;
+    socket.join("room:" + code);
   });
 });
 
